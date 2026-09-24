@@ -1,0 +1,14 @@
+name: Keep Supabase Alive
+on:
+  schedule:
+    # Runs at 00:00 UTC on Mondays and Thursdays (twice a week)
+    - cron: '0 0 * * 1,4'
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Health Endpoint
+        run: |
+          curl -sS -o /dev/null -w "%{http_code}" https://aurexissolution.com/api/health
