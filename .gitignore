@@ -53,3 +53,6 @@ Pictures/
 
 # Unused 28 MB original hero video (replaced by public/videos/solutions/*)
 /public/videos/presence-hero.mp4
+
+# Generated one-file bundle of all migrations (paste into SQL Editor)
+/supabase/_bundle.sql
