@@ -17,7 +17,11 @@ export function WorkDetailHero({ item }: { item: CaseStudy }) {
         <WorkSectionLabel>{item.industry}</WorkSectionLabel>
         <h1
           className="max-w-3xl font-serif italic font-normal text-white"
-          style={{ fontSize: 'clamp(30px, 4.4vw, 54px)', lineHeight: 1.16, letterSpacing: '-0.01em' }}
+          style={{
+            fontSize: 'clamp(30px, 4.4vw, 54px)',
+            lineHeight: 1.16,
+            letterSpacing: '-0.01em',
+          }}
         >
           {item.outcomeHeadline}
         </h1>

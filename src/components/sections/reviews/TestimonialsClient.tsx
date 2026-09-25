@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Star } from "lucide-react";
 import { Monogram } from "./Monogram";
+import { LeaveReview } from "./LeaveReview";
 import type { Review } from "@/types/portal";
 import { useSafeReducedMotion } from "@/lib/hooks/use-safe-reduced-motion";
 
@@ -16,12 +17,6 @@ const MARQUEE_THRESHOLD = 5;
 
 /** Names shown in the top strip before it starts wrapping into a mess. */
 const WORDMARK_LIMIT = 6;
-
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_AUREXIS_WHATSAPP || "60164071129";
-
-const REVIEW_WA_HREF = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-  "Hi Aurexis - I'd like to leave a review about working with you.",
-)}`;
 
 /** Fixed locale so the server and client render the same string. */
 function formatMonth(iso: string | null): string {
@@ -201,16 +196,7 @@ export function TestimonialsClient({ reviews }: { reviews: Review[] }) {
         transition={{ duration: reduce ? 0 : 0.45 }}
       >
         <p className="text-[13px] text-white/40">
-          Worked with us?{" "}
-          <a
-            href={REVIEW_WA_HREF}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded text-[var(--color-electric-cyan)]/80 underline-offset-4 transition-colors hover:text-[var(--color-electric-cyan)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-electric-cyan)]/60"
-          >
-            Leave a review
-          </a>
-          .
+          Worked with us? <LeaveReview />.
         </p>
         <Link
           href="/contact#brief"

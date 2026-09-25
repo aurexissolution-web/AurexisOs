@@ -32,7 +32,7 @@ function WorkCard({ item }: { item: CaseStudy }) {
         <h3 className="font-serif text-[19px] italic leading-[1.2] tracking-[-0.01em] text-white">
           {item.clientName}
         </h3>
-        <p className="text-[13px] leading-[1.55] text-white/55">{item.problem}</p>
+        <p className="text-[13px] leading-[1.55] text-white/55">{item.summary || item.problem}</p>
         <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-[13px] font-semibold text-white">
           Read the story
           <ArrowRight

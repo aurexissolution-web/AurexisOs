@@ -23,14 +23,15 @@ export function Monogram({ name, size = 40, className }: MonogramProps) {
       aria-hidden
       className={cn(
         "relative flex shrink-0 items-center justify-center rounded-full border border-white/[0.14] bg-gradient-to-b from-white/[0.05] to-white/[0.01] font-mono font-semibold text-[var(--color-electric-cyan)]/90",
-        className
+        className,
       )}
       style={{
         width: size,
         height: size,
         fontSize: size * 0.34,
         letterSpacing: "0.01em",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 14px rgba(0,0,0,0.35)",
+        boxShadow:
+          "inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 14px rgba(0,0,0,0.35)",
       }}
     >
       <span

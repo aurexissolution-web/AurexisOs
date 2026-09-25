@@ -18,7 +18,11 @@ export function InsightsClosingCTA() {
           <InsightsSectionLabel>Talk To Us</InsightsSectionLabel>
           <h2
             className="font-serif italic text-white"
-            style={{ fontSize: 'clamp(28px, 4vw, 48px)', lineHeight: 1.15, letterSpacing: '-0.01em' }}
+            style={{
+              fontSize: 'clamp(28px, 4vw, 48px)',
+              lineHeight: 1.15,
+              letterSpacing: '-0.01em',
+            }}
           >
             Have a system you&apos;re trying to figure out?
           </h2>

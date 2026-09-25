@@ -2,7 +2,8 @@
 import ReactMarkdown, { type Components } from 'react-markdown';
 import { INSIGHTS_ACCENT } from '@/data/insights-config';
 
-const components: Components = {
+// Exported so the admin editor's live preview renders exactly like the site.
+export const insightsMarkdownComponents: Components = {
   h1: ({ children }) => (
     <h2 className="mt-10 font-serif text-2xl italic leading-[1.2] tracking-[-0.01em] text-white first:mt-0 md:text-3xl">
       {children}
@@ -59,6 +60,16 @@ const components: Components = {
       {children}
     </code>
   ),
+  img: ({ src, alt }) =>
+    typeof src === 'string' ? (
+      // eslint-disable-next-line @next/next/no-img-element -- remote CMS images of unknown size
+      <img
+        src={src}
+        alt={alt ?? ''}
+        loading="lazy"
+        className="mt-6 w-full rounded-2xl border border-white/10"
+      />
+    ) : null,
   pre: ({ children }) => (
     <pre className="mt-5 overflow-x-auto rounded-xl border border-white/10 bg-black/40 p-4 font-mono text-[13px] leading-[1.6] text-white/80">
       {children}
@@ -70,7 +81,7 @@ export function InsightsPostBody({ body }: { body: string }) {
   return (
     <section className="border-t border-white/[0.08] px-6 py-16 md:py-20">
       <div className="mx-auto max-w-3xl">
-        <ReactMarkdown components={components}>{body}</ReactMarkdown>
+        <ReactMarkdown components={insightsMarkdownComponents}>{body}</ReactMarkdown>
       </div>
     </section>
   );

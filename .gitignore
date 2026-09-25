@@ -56,3 +56,4 @@ Pictures/
 
 # Generated one-file bundle of all migrations (paste into SQL Editor)
 /supabase/_bundle.sql
+/supabase/_apply_*.sql

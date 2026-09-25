@@ -12,4 +12,6 @@ export interface InsightPost {
   published_at: string;
   status: InsightPostStatus;
   created_at: string;
+  cover_image_url?: string | null;
+  updated_at?: string;
 }

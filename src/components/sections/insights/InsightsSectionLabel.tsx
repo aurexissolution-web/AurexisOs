@@ -8,7 +8,10 @@ export function InsightsSectionLabel({ children }: { children: ReactNode }) {
       <span
         aria-hidden
         className="h-1.5 w-1.5 rounded-full"
-        style={{ background: INSIGHTS_ACCENT, boxShadow: `0 0 8px rgba(${INSIGHTS_ACCENT_RGB},0.7)` }}
+        style={{
+          background: INSIGHTS_ACCENT,
+          boxShadow: `0 0 8px rgba(${INSIGHTS_ACCENT_RGB},0.7)`,
+        }}
       />
       <span
         className="font-mono text-[11px] uppercase tracking-[0.32em]"

@@ -19,7 +19,11 @@ export function WorkClosingCTA({ clientName }: { clientName?: string }) {
           <WorkSectionLabel>Talk To Us</WorkSectionLabel>
           <h2
             className="font-serif italic text-white"
-            style={{ fontSize: 'clamp(28px, 4vw, 48px)', lineHeight: 1.15, letterSpacing: '-0.01em' }}
+            style={{
+              fontSize: 'clamp(28px, 4vw, 48px)',
+              lineHeight: 1.15,
+              letterSpacing: '-0.01em',
+            }}
           >
             Want a system like this for your business?
           </h2>

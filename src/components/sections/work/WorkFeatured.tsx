@@ -34,13 +34,13 @@ export function WorkFeatured({ item }: { item: CaseStudy }) {
             <h2 className="font-serif text-2xl italic leading-[1.15] tracking-[-0.01em] text-white md:text-3xl">
               {item.outcomeHeadline}
             </h2>
-            <p className="text-[14px] leading-[1.6] text-white/60 md:text-[15px]">{item.problem}</p>
+            <p className="text-[14px] leading-[1.6] text-white/60 md:text-[15px]">
+              {item.summary || item.problem}
+            </p>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/35">
               {item.clientName}
             </p>
-            <span
-              className="mt-2 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-white"
-            >
+            <span className="mt-2 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-white">
               Read the story
               <ArrowRight
                 className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"

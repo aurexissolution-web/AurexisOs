@@ -17,10 +17,22 @@ export function InsightsDetailHero({ post }: { post: InsightPost }) {
         <InsightsSectionLabel>{formatInsightDate(post.published_at)}</InsightsSectionLabel>
         <h1
           className="font-serif italic font-normal text-white"
-          style={{ fontSize: 'clamp(30px, 4.4vw, 54px)', lineHeight: 1.16, letterSpacing: '-0.01em' }}
+          style={{
+            fontSize: 'clamp(30px, 4.4vw, 54px)',
+            lineHeight: 1.16,
+            letterSpacing: '-0.01em',
+          }}
         >
           {post.title}
         </h1>
+        {post.cover_image_url && (
+          // eslint-disable-next-line @next/next/no-img-element -- CMS image of unknown size
+          <img
+            src={post.cover_image_url}
+            alt=""
+            className="mt-10 aspect-[16/9] w-full rounded-2xl border border-white/10 object-cover"
+          />
+        )}
       </div>
     </section>
   );

@@ -7,8 +7,9 @@ import { InsightsClosingCTA } from '@/components/sections/insights/InsightsClosi
 import { getInsightPosts } from '@/lib/insights';
 
 export const metadata = {
-  title: 'Insights — Aurexis Solution',
-  description: "What we're learning, building this in public.",
+  title: 'Insights on Automation & AI for SMEs | Aurexis Solution',
+  description:
+    'Plain-language notes from the Aurexis Solution team on business automation, AI, WhatsApp, LHDN e-Invoice and building software for Malaysian SMEs.',
 };
 
 // Newly published posts must show up without a redeploy.
