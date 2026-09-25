@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useSafeReducedMotion } from "@/lib/hooks/use-safe-reduced-motion";
 import { SectionDivider } from "@/components/ui/section-divider";
@@ -45,6 +46,97 @@ const services: Service[] = [
   },
 ];
 
+// Decoding several looping videos at once drops frame rate on weaker devices, so
+// only one plays at a time: the hovered one, else the one nearest the screen centre.
+// The rest show their poster frame and load nothing until needed.
+type VideoEntry = { visible: boolean; src: string };
+const videoRegistry = new Map<HTMLVideoElement, VideoEntry>();
+let hoveredVideo: HTMLVideoElement | null = null;
+let updateQueued = false;
+
+function updateVideos() {
+  updateQueued = false;
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  let best: HTMLVideoElement | null = null;
+  let bestDist = Infinity;
+  for (const [video, entry] of videoRegistry) {
+    if (!entry.visible) continue;
+    if (video === hoveredVideo) {
+      best = video;
+      break;
+    }
+    const r = video.getBoundingClientRect();
+    const dist = Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = video;
+    }
+  }
+  for (const [video, entry] of videoRegistry) {
+    if (video === best) {
+      if (!video.getAttribute("src")) video.src = entry.src;
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }
+}
+
+function queueVideoUpdate() {
+  if (updateQueued) return;
+  updateQueued = true;
+  requestAnimationFrame(updateVideos);
+}
+
+function LazyLoopVideo({ src, poster }: { src: string; poster: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    const entry: VideoEntry = { visible: false, src };
+    videoRegistry.set(v, entry);
+    const io = new IntersectionObserver(
+      ([e]) => {
+        entry.visible = e.isIntersecting;
+        queueVideoUpdate();
+      },
+      { rootMargin: "100px 0px" },
+    );
+    io.observe(v);
+    window.addEventListener("scroll", queueVideoUpdate, { passive: true });
+    window.addEventListener("resize", queueVideoUpdate);
+    return () => {
+      io.disconnect();
+      window.removeEventListener("scroll", queueVideoUpdate);
+      window.removeEventListener("resize", queueVideoUpdate);
+      videoRegistry.delete(v);
+      if (hoveredVideo === v) hoveredVideo = null;
+    };
+  }, [src]);
+
+  return (
+    <video
+      ref={ref}
+      muted
+      loop
+      playsInline
+      preload="none"
+      poster={poster}
+      onPointerEnter={(e) => {
+        hoveredVideo = e.currentTarget;
+        queueVideoUpdate();
+      }}
+      onPointerLeave={() => {
+        hoveredVideo = null;
+        queueVideoUpdate();
+      }}
+      className="absolute inset-0 h-full w-full object-cover"
+    />
+  );
+}
+
 interface VideoVisualProps {
   video: string;
   accent: string;
@@ -68,16 +160,10 @@ function VideoVisual({ video, accent, reduce }: VideoVisualProps) {
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-black">
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        className="absolute inset-0 h-full w-full object-cover"
-      >
-        <source src={`/videos/value-add/${video}`} type="video/mp4" />
-      </video>
+      <LazyLoopVideo
+        src={`/videos/value-add/${video}`}
+        poster={`/videos/value-add/${video.replace(/\.mp4$/, ".jpg")}`}
+      />
 
       <div
         aria-hidden
