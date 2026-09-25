@@ -40,7 +40,7 @@ const capabilities: Capability[] = [
       "Live in weeks",
     ],
     pricePrefix: "From",
-    priceAmount: "RM1,850",
+    priceAmount: "RM1,525",
     whatsappService: "Presence (website)",
   },
   {
@@ -60,7 +60,7 @@ const capabilities: Capability[] = [
       "Hours back every week",
     ],
     pricePrefix: "From",
-    priceAmount: "RM2,800",
+    priceAmount: "RM2,250",
     whatsappService: "Flow (admin automation)",
   },
   {
@@ -80,7 +80,7 @@ const capabilities: Capability[] = [
       "Year-end reports for your accountant",
     ],
     pricePrefix: "From",
-    priceAmount: "RM1,500 + monthly",
+    priceAmount: "RM2,525",
     whatsappService: "Core (operations system)",
   },
   {
@@ -99,7 +99,8 @@ const capabilities: Capability[] = [
       "Nothing goes cold",
       "You see every conversation",
     ],
-    priceAmount: "RM4,500",
+    pricePrefix: "From",
+    priceAmount: "RM2,250",
     whatsappService: "Connect (leads & follow-up)",
   },
   {
@@ -119,7 +120,7 @@ const capabilities: Capability[] = [
       "Credited against a Core build",
     ],
     pricePrefix: "From",
-    priceAmount: "RM1,500",
+    priceAmount: "RM1,525",
     whatsappService: "AI Readiness Audit",
   },
 ];

@@ -55,7 +55,7 @@ const ITEM_ICONS: Record<string, LucideIcon> = {
   'Full brand identity': Palette,
   'Professional photography': Camera,
   'Extra language': Languages,
-  'On-page SEO setup': Search,
+  'On-page SEO/AEO setup': Search,
   'Google Business Profile': MapPin,
   'Schema markup': Braces,
   'Technical SEO audit': ScanSearch,

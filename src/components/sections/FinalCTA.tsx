@@ -52,7 +52,7 @@ const MESSAGES: Msg[] = [
   },
   {
     speaker: "aurexis",
-    text: "Doable. ~6 weeks, RM 35–50k. Want to scope on a quick call?",
+    text: "Doable. ~6 weeks, from RM 5,250. Want to scope on a quick call?",
     time: "12:15",
   },
 ];

@@ -65,7 +65,7 @@ export const SETUP_TIERS: CoreSetupTier[] = [
   {
     number: '01',
     name: 'Core Starter',
-    price: 'RM15,000–25,000',
+    price: 'From RM2,525',
     bestFor: 'One process, properly systemised',
     timeline: '4–8 weeks',
     carePlan: 'Required',
@@ -80,7 +80,7 @@ export const SETUP_TIERS: CoreSetupTier[] = [
   {
     number: '02',
     name: 'Core Growth',
-    price: 'RM25,000–60,000',
+    price: 'From RM5,255',
     bestFor: 'Multiple connected modules — inventory, CRM, job tracking',
     timeline: '8–14 weeks',
     carePlan: 'Required',
@@ -96,7 +96,7 @@ export const SETUP_TIERS: CoreSetupTier[] = [
   {
     number: '03',
     name: 'Core Enterprise',
-    price: 'From RM60,000',
+    price: 'Quoted',
     bestFor: 'Multi-branch, multi-user, deep integrations',
     timeline: 'From 4 months',
     carePlan: 'Required',
@@ -119,7 +119,7 @@ export const CARE_PLANS_INTRO =
 export const CARE_TIERS: CoreCareTier[] = [
   {
     name: 'Care Basic',
-    price: 'RM500–800/mo',
+    price: 'From RM485/mo',
     features: [
       'Bug fixes',
       'Security patches and dependency updates',
@@ -130,7 +130,7 @@ export const CARE_TIERS: CoreCareTier[] = [
   },
   {
     name: 'Care Growth',
-    price: 'RM1,000–2,000/mo',
+    price: 'From RM925/mo',
     features: [
       'Everything in Basic, plus:',
       'Minor feature requests',
@@ -140,7 +140,7 @@ export const CARE_TIERS: CoreCareTier[] = [
   },
   {
     name: 'Care Enterprise',
-    price: 'From RM2,500/mo',
+    price: 'Quoted',
     features: [
       'Everything in Growth, plus:',
       'Named response time (business hours)',
@@ -157,7 +157,7 @@ export const CARE_CHOICE_ROWS: CoreChoiceRow[] = [
 ];
 
 export const CARE_FOOTNOTE =
-  'Care plans are priced at roughly 15–25% of the build cost per year — the same convention the wider software industry uses.';
+  'Care plans are billed monthly and sized to your system, so a bigger build gets more support and faster response.';
 
 export const CARE_AI_UPLIFT_NOTE =
   'Optional uplift on any Care tier — AI insights review: monthly AI-generated business-health commentary, human-reviewed. +RM500–1,500/mo.';
@@ -169,7 +169,7 @@ export const ADD_ONS: CoreAddOnItem[] = [
   {
     name: 'Data migration',
     description: 'Moving your existing data — spreadsheets, old system, or both — in cleanly',
-    price: 'RM2,000–8,000',
+    price: 'From RM1,825',
   },
   {
     name: 'Data cleaning & deduplication',
@@ -194,57 +194,57 @@ export const ADD_ONS: CoreAddOnItem[] = [
   {
     name: 'Extra module',
     description: 'An additional connected module beyond your package',
-    price: 'RM5,000–15,000',
+    price: 'From RM4,250',
   },
   {
     name: 'Accounting integration',
     description: 'Two-way sync with Xero, QuickBooks, AutoCount or SQL',
-    price: 'RM3,000–8,000',
+    price: 'From RM2,825',
   },
   {
     name: 'Marketplace integration',
     description: 'Shopee, Lazada or TikTok Shop, synced automatically',
-    price: 'RM2,000–6,000',
+    price: 'From RM1,825',
   },
   {
     name: 'Government portal integration',
     description: 'MyInvois',
-    price: 'From RM5,000',
+    price: 'From RM4,250',
   },
   {
     name: 'Multi-branch premium',
     description: 'Extending a single-location build to multiple sites',
-    price: '+50–100% of setup',
+    price: '+45–100% of setup',
   },
   {
     name: 'Mobile companion app',
     description: 'iOS or Android app connected to your system',
-    price: 'RM15,000–60,000',
+    price: 'From RM13,025',
   },
   {
     name: 'Legacy system extraction',
     description: "Pulling data out of a system you're retiring",
-    price: 'RM2,000–10,000',
+    price: 'From RM1,825',
   },
   {
     name: 'Team training',
     description: 'Half-day session for your staff',
-    price: 'RM800–1,500',
+    price: 'From RM825',
   },
   {
     name: 'AI narrative layer on dashboards',
     description: 'Plain-language summaries and anomaly flags added to a BI dashboard build',
-    price: '+RM2,000–6,000',
+    price: 'From RM1,825',
   },
   {
     name: 'Predictive module',
     description: 'Sales, demand or churn forecasting attached to a Core build',
-    price: 'RM8,000–20,000',
+    price: 'From RM6,825',
   },
   {
     name: 'AI advisor reasoning layer',
     description: 'An LLM that reads your dashboards and database and returns written recommendations',
-    price: 'RM4,000–10,000',
+    price: 'From RM3,825',
   },
 ];
 

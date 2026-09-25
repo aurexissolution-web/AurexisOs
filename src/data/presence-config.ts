@@ -25,7 +25,7 @@ export const WEBSITE_TYPES: PresenceWebsiteType[] = [
   {
     number: '01',
     name: 'Landing Page',
-    price: 'From RM1,850',
+    price: 'From RM1,525',
     bestFor: 'Campaigns, single offer, ads',
     timeline: '3–7 days',
     carePlan: 'Optional, recommended',
@@ -41,7 +41,7 @@ export const WEBSITE_TYPES: PresenceWebsiteType[] = [
   {
     number: '02',
     name: 'Business Site',
-    price: 'RM6,000',
+    price: 'From RM3,250',
     bestFor: 'Small businesses getting online properly',
     timeline: '2–3 weeks',
     carePlan: 'Recommended',
@@ -58,7 +58,7 @@ export const WEBSITE_TYPES: PresenceWebsiteType[] = [
   {
     number: '03',
     name: 'Corporate Site',
-    price: 'RM9,000–14,000',
+    price: 'From RM5,025',
     bestFor: 'Established companies, multiple services',
     timeline: '3–4 weeks',
     carePlan: 'Recommended',
@@ -76,7 +76,7 @@ export const WEBSITE_TYPES: PresenceWebsiteType[] = [
   {
     number: '04',
     name: 'E-commerce Store',
-    price: 'RM8,000–25,000',
+    price: 'From RM4,250',
     bestFor: 'Selling products online',
     timeline: '3–8 weeks',
     carePlan: 'Required (database)',
@@ -95,7 +95,7 @@ export const WEBSITE_TYPES: PresenceWebsiteType[] = [
   {
     number: '05',
     name: 'Booking Site',
-    price: 'RM6,000–12,000',
+    price: 'From RM3,250',
     bestFor: 'Clinics, workshops, salons, services',
     timeline: '3–6 weeks',
     carePlan: 'Required (database)',
@@ -113,7 +113,7 @@ export const WEBSITE_TYPES: PresenceWebsiteType[] = [
   {
     number: '06',
     name: 'Client Portal / Membership',
-    price: 'From RM8,000',
+    price: 'From RM5,250',
     bestFor: 'Law firms, training, logistics',
     timeline: '4–10 weeks',
     carePlan: 'Required (database)',
@@ -157,49 +157,49 @@ export const ADD_ON_CATEGORIES: PresenceAddOnCategory[] = [
   {
     heading: 'Content & Brand',
     items: [
-      { name: 'Copywriting', price: 'RM500–3,000' },
-      { name: 'Logo design', price: 'RM500–3,600' },
-      { name: 'Full brand identity', price: 'RM3,000–15,000' },
-      { name: 'Professional photography', price: 'RM800–5,000' },
-      { name: 'Extra language', price: 'RM500–2,000 each' },
+      { name: 'Copywriting', price: 'From RM325' },
+      { name: 'Logo design', price: 'From RM425' },
+      { name: 'Full brand identity', price: 'From RM1,250' },
+      { name: 'Professional photography', price: 'From RM425' },
+      { name: 'Extra language', price: 'From RM425' },
     ],
   },
   {
     heading: 'Getting Found',
     items: [
-      { name: 'On-page SEO setup', price: 'RM500–2,000' },
-      { name: 'Google Business Profile', price: 'RM800–1,200' },
-      { name: 'Schema markup', price: 'RM300–1,000' },
-      { name: 'Technical SEO audit', price: 'RM1,000–3,500' },
-      { name: 'Speed optimisation', price: 'RM500–2,500' },
+      { name: 'On-page SEO/AEO setup', price: 'From RM425' },
+      { name: 'Google Business Profile', price: 'From RM515' },
+      { name: 'Schema markup', price: 'From RM250' },
+      { name: 'Technical SEO audit', price: 'From RM825' },
+      { name: 'Speed optimisation', price: 'From RM425' },
     ],
   },
   {
     heading: 'Tracking & Conversion',
     items: [
-      { name: 'Google Analytics + Search Console', price: 'RM500–1,500' },
-      { name: 'Meta Pixel + conversion tracking', price: 'RM300–1,000' },
-      { name: 'WhatsApp chat button', price: 'RM100–500' },
-      { name: 'Live chat widget', price: 'RM300–1,000' },
-      { name: 'Newsletter signup', price: 'RM300–1,500' },
+      { name: 'Google Analytics + Search Console', price: 'From RM425' },
+      { name: 'Meta Pixel + conversion tracking', price: 'From RM285' },
+      { name: 'WhatsApp chat button', price: 'From RM55' },
+      { name: 'Live chat widget', price: 'From RM325' },
+      { name: 'Newsletter signup', price: 'From RM285' },
     ],
   },
   {
     heading: 'Functionality',
     items: [
-      { name: 'Payment gateway', price: 'RM500–2,000' },
-      { name: 'Booking module', price: 'RM1,200–3,500' },
-      { name: 'Blog setup + training', price: 'RM500–2,000' },
-      { name: 'Site migration', price: 'RM1,000–3,000' },
-      { name: 'Business email setup', price: 'RM300–800' },
+      { name: 'Payment gateway', price: 'From RM425' },
+      { name: 'Booking module', price: 'From RM925' },
+      { name: 'Blog setup + training', price: 'From RM425' },
+      { name: 'Site migration', price: 'From RM825' },
+      { name: 'Business email setup', price: 'From RM285' },
     ],
   },
   {
     heading: 'Compliance',
     items: [
-      { name: 'PDPA cookie consent banner', price: 'RM300–1,500' },
-      { name: 'Privacy policy + terms', price: 'RM300–1,500' },
-      { name: 'LHDN e-Invoice integration', price: 'From RM5,000' },
+      { name: 'PDPA cookie consent banner', price: 'From RM285' },
+      { name: 'Privacy policy + terms', price: 'From RM285' },
+      { name: 'LHDN e-Invoice integration', price: 'From RM4,625' },
     ],
   },
 ];
@@ -212,7 +212,7 @@ export const ADD_ON_HINTS: Record<string, string> = {
   'Full brand identity': 'Logo, colours, fonts and guidelines — the full look.',
   'Professional photography': 'Real photos of your team, space and work.',
   'Extra language': 'Your site in Bahasa Malaysia, Chinese, Tamil or more.',
-  'On-page SEO setup': 'Titles, headings and keywords set up for search.',
+  'On-page SEO/AEO setup': 'Titles, headings, keywords and answer-ready content, set up for Google and AI search.',
   'Google Business Profile': 'Show up on Google Maps with your hours and reviews.',
   'Schema markup': 'Helps Google show richer results for your pages.',
   'Technical SEO audit': 'A full check of what is holding your rankings back.',
@@ -254,7 +254,7 @@ export const CARE_PLAN_GROUPS: PresenceCarePlanGroup[] = [
       },
       {
         name: 'Growth',
-        price: 'RM750/mo',
+        price: 'RM650/mo',
         features: [
           'Everything in Essential',
           '3 hrs/mo edits',
@@ -266,7 +266,7 @@ export const CARE_PLAN_GROUPS: PresenceCarePlanGroup[] = [
       },
       {
         name: 'Partner',
-        price: 'RM1,500/mo',
+        price: 'RM1,425/mo',
         features: [
           'Everything in Growth',
           '8 hrs/mo edits',
@@ -286,7 +286,7 @@ export const CARE_PLAN_GROUPS: PresenceCarePlanGroup[] = [
     tiers: [
       {
         name: 'Essential',
-        price: 'RM550/mo',
+        price: 'RM525/mo',
         features: [
           'Hosting/SSL/uptime',
           'Database hosting + daily backups',
@@ -297,7 +297,7 @@ export const CARE_PLAN_GROUPS: PresenceCarePlanGroup[] = [
       },
       {
         name: 'Growth',
-        price: 'RM950/mo',
+        price: 'RM825/mo',
         features: [
           'Everything in Essential',
           '5 hrs/mo edits',
@@ -308,7 +308,7 @@ export const CARE_PLAN_GROUPS: PresenceCarePlanGroup[] = [
       },
       {
         name: 'Partner',
-        price: 'RM1,600/mo',
+        price: 'RM1,625/mo',
         features: [
           'Everything in Growth',
           '10 hrs/mo edits',

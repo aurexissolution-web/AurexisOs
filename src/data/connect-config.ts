@@ -47,7 +47,7 @@ export const SETUP_TIERS: ConnectSetupTier[] = [
   {
     number: '01',
     name: 'Connect Starter',
-    price: 'RM2,500',
+    price: 'From RM2,250',
     bestFor: 'Getting off a personal number, properly',
     timeline: '3–7 days',
     managementPlan: 'Recommended',
@@ -65,7 +65,7 @@ export const SETUP_TIERS: ConnectSetupTier[] = [
   {
     number: '02',
     name: 'Connect Growth',
-    price: 'RM4,500',
+    price: 'From RM4,250',
     bestFor: 'Capturing and qualifying leads automatically',
     timeline: '2–3 weeks',
     managementPlan: 'Recommended',
@@ -84,7 +84,7 @@ export const SETUP_TIERS: ConnectSetupTier[] = [
   {
     number: '03',
     name: 'Connect Pro',
-    price: 'RM8,000',
+    price: 'From RM6,250',
     bestFor: 'Full automation with compliant broadcasting',
     timeline: '3–5 weeks',
     managementPlan: 'Required',
@@ -124,7 +124,7 @@ export const SETUP_TIERS_NOTE = 'Scoped and quoted after a discovery session.';
 export const MANAGEMENT_TIERS: ConnectManagementTier[] = [
   {
     name: 'Care',
-    price: 'RM800/mo',
+    price: 'RM785/mo',
     features: [
       'Account monitoring and uptime',
       'Template maintenance and renewals',
@@ -134,7 +134,7 @@ export const MANAGEMENT_TIERS: ConnectManagementTier[] = [
   },
   {
     name: 'Manage',
-    price: 'RM1,800/mo',
+    price: 'RM1,625/mo',
     features: [
       'Everything in Care, plus:',
       'Flow adjustments 4 hrs/mo',
@@ -146,7 +146,7 @@ export const MANAGEMENT_TIERS: ConnectManagementTier[] = [
   },
   {
     name: 'Scale',
-    price: 'RM3,500/mo',
+    price: 'RM3,250/mo',
     features: [
       'Everything in Manage, plus:',
       'Flow adjustments 10 hrs/mo',
@@ -232,10 +232,10 @@ export const REAL_MONTH_ITEMS: ConnectMonthLineItem[] = [
   { label: 'Platform fee', amount: 'RM299' },
   { label: '2 broadcasts to 1,000 contacts', amount: 'RM694' },
   { label: '500 appointment reminders (utility)', amount: 'RM28' },
-  { label: 'Aurexis Manage plan', amount: 'RM1,800' },
+  { label: 'Aurexis Manage plan', amount: 'RM1,625' },
 ];
 
-export const REAL_MONTH_TOTAL = { label: 'Total', amount: '≈ RM2,821' };
+export const REAL_MONTH_TOTAL = { label: 'Total', amount: '≈ RM2,646' };
 
 export const REAL_MONTH_FOOTNOTE =
   'Illustrative only. Your actual Meta cost depends entirely on how many messages you send and in which category. Malaysian SST of 8% applies to digital services and platform fees where relevant.';
@@ -247,52 +247,52 @@ export const ADD_ONS: ConnectAddOnItem[] = [
   {
     name: 'Extra language',
     description: 'BM, Chinese or Tamil, including rojak and mixed-language handling',
-    price: 'RM2,000–5,000',
+    price: 'From RM1,825',
   },
   {
     name: 'Extra number or branch',
     description: 'Additional WhatsApp number set up and connected',
-    price: 'RM800–1,500',
+    price: 'From RM825',
   },
   {
     name: 'CRM integration',
     description: 'Sync conversations and leads into your CRM',
-    price: 'RM1,000–5,000',
+    price: 'From RM925',
   },
   {
     name: 'Booking integration',
     description: 'Book appointments inside the chat',
-    price: 'RM1,000–3,000',
+    price: 'From RM925',
   },
   {
     name: 'Payment collection',
     description: 'Send payment links in conversation',
-    price: 'RM500–2,000',
+    price: 'From RM485',
   },
   {
     name: 'Click-to-WhatsApp ads setup',
     description: 'Facebook and Instagram ads that open straight into chat',
-    price: 'RM500–2,000',
+    price: 'From RM485',
   },
   {
     name: 'Product catalogue',
     description: 'Browsable catalogue inside WhatsApp',
-    price: 'RM500–2,000',
+    price: 'From RM485',
   },
   {
     name: 'Instagram and Messenger',
     description: 'Same inbox, more channels',
-    price: 'RM1,500–4,000',
+    price: 'From RM1,425',
   },
   {
     name: 'Data import',
     description: 'Bring your existing contact list in, cleaned and consent-tagged',
-    price: 'RM800–3,000',
+    price: 'From RM825',
   },
   {
     name: 'Team training',
     description: 'Half-day session for your staff',
-    price: 'RM800–1,500',
+    price: 'From RM825',
   },
 ];
 

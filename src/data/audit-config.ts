@@ -39,7 +39,7 @@ export const AUDIT_TIERS: AuditTierCard[] = [
   {
     number: '01',
     name: 'Audit Light',
-    price: 'RM1,500–3,000',
+    price: 'From RM1,525',
     bestFor: 'A ranked list to start conversations with',
     timeline: '1 week',
     delivery: 'async',
@@ -54,7 +54,7 @@ export const AUDIT_TIERS: AuditTierCard[] = [
   {
     number: '02',
     name: 'Audit Full',
-    price: 'RM4,000–8,000',
+    price: 'From RM3,250',
     bestFor: 'A written roadmap you can act on',
     timeline: '2 weeks',
     delivery: 'discovery call + workshop',

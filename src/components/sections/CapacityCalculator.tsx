@@ -207,7 +207,7 @@ export function CapacityCalculator() {
           <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40">
             The Capacity Calculator
           </span>
-          <h1 className="mx-auto mt-4 max-w-4xl text-3xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white text-balance md:text-4xl lg:mt-1 lg:text-4xl">
+          <h2 className="mx-auto mt-4 max-w-4xl text-3xl font-extrabold leading-[1.05] tracking-[-0.02em] text-white text-balance md:text-4xl lg:mt-1 lg:text-4xl">
             How much is admin work{" "}
             <em
               className="font-serif font-normal italic text-[var(--color-electric-cyan)]"
@@ -216,7 +216,7 @@ export function CapacityCalculator() {
               costing you
             </em>
             ?
-          </h1>
+          </h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-[1.6] text-white/55 md:text-base lg:mt-1">
             Three numbers. One uncomfortable answer.
           </p>
@@ -387,7 +387,7 @@ export function CapacityCalculator() {
                   muted
                   caps
                 />
-                <LedgerLine label="What a system costs" value="From RM 1,500" muted caps />
+                <LedgerLine label="What a system costs" value="From RM 2,250" muted caps />
               </div>
 
               <p className="mt-5 text-[15px] leading-[1.6] text-white/70 lg:mt-2 lg:text-[13px] lg:leading-[1.4]">

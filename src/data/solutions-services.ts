@@ -30,7 +30,7 @@ export const SERVICES: SolutionsService[] = [
     problemLine: "Search for the business. Get nothing — or a site that looks abandoned.",
     body: "No way for a customer to check they're real. Comparing two businesses, they pick the one they can find.",
     pricePrefix: "From",
-    priceAmount: "RM1,850",
+    priceAmount: "RM1,525",
     detailHref: "/solutions/presence",
     bullets: [
       "3-page site minimum, mobile-first design",
@@ -45,7 +45,7 @@ export const SERVICES: SolutionsService[] = [
     problemLine: "Quotes, invoices, reminders — typed by hand, every time.",
     body: "Time that should have gone into the work went into retyping the same document.",
     pricePrefix: "From",
-    priceAmount: "RM2,800",
+    priceAmount: "RM2,250",
     detailHref: "/solutions/flow",
     bullets: [
       "One process automated — quotes, invoicing, or payment reminders",
@@ -60,7 +60,7 @@ export const SERVICES: SolutionsService[] = [
     problemLine: "A wiring business run on a notebook and a spreadsheet that didn't always agree.",
     body: "No way to tell if a job made money until long after it was done — and paperwork every night after a full day on site.",
     pricePrefix: "From",
-    priceAmount: "RM15,000",
+    priceAmount: "RM2,525",
     detailHref: "/solutions/core",
     bullets: [
       "One core module — job tracking, inventory or booking — built around how you actually work",
@@ -75,7 +75,7 @@ export const SERVICES: SolutionsService[] = [
     problemLine: "Every enquiry landed in one WhatsApp, mixed in with everything else.",
     body: "No way to tell a serious lead from a casual question. Things sat until someone happened to open the chat.",
     pricePrefix: "From",
-    priceAmount: "RM2,500",
+    priceAmount: "RM2,250",
     detailHref: "/solutions/connect",
     bullets: [
       "WhatsApp Business API set up and Meta-verified on your own number",
@@ -91,7 +91,7 @@ export const SERVICES: SolutionsService[] = [
       'Everyone says "you should be using AI." Nobody says which part, or whether it\'s worth it for you.',
     body: "A short paid diagnostic that maps where AI actually helps in your business — and where it doesn't. Written roadmap, grant-fundable, credited against a Core build if you decide to go ahead.",
     pricePrefix: "From",
-    priceAmount: "RM1,500",
+    priceAmount: "RM1,525",
     detailHref: "/solutions/ai-readiness-audit",
     bullets: [
       "Ranked list of where AI actually helps in your business",

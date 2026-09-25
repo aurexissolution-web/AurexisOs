@@ -19,7 +19,7 @@ const faqs: FAQ[] = [
   {
     id: "cost",
     q: "How much does this cost?",
-    a: "Presence, a website that brings customers in, starts from RM1,850. Core, which runs your whole business from one place, starts from RM1,500 plus a monthly fee. The exact number depends on what you need — we'll give you a fixed price before any work starts.",
+    a: "Presence, a website that brings customers in, starts from RM1,525. Flow and Connect start from RM2,250, Core from RM2,525, and the AI Readiness Audit from RM1,525. The exact number depends on what you need — we'll give you a fixed price before any work starts.",
   },
   {
     id: "timeline",

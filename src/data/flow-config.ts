@@ -50,7 +50,7 @@ export const SETUP_TIERS: FlowSetupTier[] = [
   {
     number: '01',
     name: 'Flow Lite',
-    price: 'RM2,800–4,500',
+    price: 'From RM2,250',
     bestFor: 'One process, done properly',
     timeline: '1–2 weeks',
     managementPlan: 'Recommended',
@@ -64,7 +64,7 @@ export const SETUP_TIERS: FlowSetupTier[] = [
   {
     number: '02',
     name: 'Flow Core',
-    price: 'RM6,000–12,000',
+    price: 'From RM5,250',
     bestFor: 'Quotes, invoicing, reminders and compliance in one system',
     timeline: '2–4 weeks',
     managementPlan: 'Recommended',
@@ -80,7 +80,7 @@ export const SETUP_TIERS: FlowSetupTier[] = [
   {
     number: '03',
     name: 'Flow Max',
-    price: 'RM14,000–28,000',
+    price: 'From RM12,085',
     bestFor: 'Full admin suite across multiple departments',
     timeline: '4–8 weeks',
     managementPlan: 'Required',
@@ -97,12 +97,12 @@ export const SETUP_TIERS: FlowSetupTier[] = [
 export const MANAGEMENT_TIERS: FlowManagementTier[] = [
   {
     name: 'Care',
-    price: 'RM600–900/mo',
+    price: 'From RM525/mo',
     features: ['Monitoring and error fixes', 'Minor adjustments', 'Monthly report'],
   },
   {
     name: 'Manage',
-    price: 'RM1,200–1,800/mo',
+    price: 'From RM1,125/mo',
     features: [
       'Everything in Care, plus:',
       '1 new or changed workflow per quarter',
@@ -111,7 +111,7 @@ export const MANAGEMENT_TIERS: FlowManagementTier[] = [
   },
   {
     name: 'Partner',
-    price: 'RM2,200–3,500/mo',
+    price: 'From RM2,025/mo',
     features: [
       'Everything in Manage, plus:',
       '1 new or changed workflow per month',
@@ -142,52 +142,52 @@ export const ADD_ONS: FlowAddOnItem[] = [
   {
     name: 'Extra integration',
     description: 'Connect one more app or system',
-    price: 'RM1,000–3,000',
+    price: 'From RM825',
   },
   {
     name: 'Accounting sync',
     description: 'Push data automatically into your accounting package',
-    price: 'RM2,000–8,000',
+    price: 'From RM1,825',
   },
   {
     name: 'E-signature integration',
     description: 'Documents signed and returned without printing',
-    price: 'RM1,000–4,000',
+    price: 'From RM835',
   },
   {
     name: 'Document generation',
     description: 'Auto-fill contracts, letters and quotes from templates',
-    price: 'RM1,500–4,000',
+    price: 'From RM1,425',
   },
   {
     name: 'HR workflow — leave & claims',
     description: 'Approval routing, automatically',
-    price: 'RM1,500–5,000',
+    price: 'From RM1,250',
   },
   {
     name: 'Staff onboarding workflow',
     description: 'New hire paperwork and setup, automated',
-    price: 'RM1,500–4,000',
+    price: 'From RM1,425',
   },
   {
     name: 'OCR / document extraction',
     description: 'Pull data automatically from scanned invoices or forms',
-    price: 'RM2,000–6,000',
+    price: 'From RM1,825',
   },
   {
     name: 'Notification workflows',
     description: 'Alerts to your team via Slack, Telegram or email',
-    price: 'RM500–2,000',
+    price: 'From RM485',
   },
   {
     name: 'Data import',
     description: 'Bring in existing client and invoice history, cleaned',
-    price: 'RM800–3,000',
+    price: 'From RM815',
   },
   {
     name: 'Team training',
     description: 'Half-day session for your staff',
-    price: 'RM800–1,500',
+    price: 'From RM815',
   },
 ];
 
