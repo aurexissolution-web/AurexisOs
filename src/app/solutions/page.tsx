@@ -28,9 +28,9 @@ function SolutionsLabelPill() {
 }
 
 export const metadata = {
-  title: "Solutions — Aurexis Solution",
+  title: "Solutions: Websites, Automation & AI | Aurexis Solution",
   description:
-    "Priced separately. Pick the one that hurts most — add the others when you're ready.",
+    "Five services for Malaysian businesses, priced separately: Presence (websites), Flow (automation), Core (systems), Connect (WhatsApp) and the AI Readiness Audit.",
 };
 
 const PICKER_SOLUTIONS = SERVICES.map((s) => ({
