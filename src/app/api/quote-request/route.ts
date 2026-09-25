@@ -2,10 +2,17 @@
 // Shared endpoint for every "Get a Quote" form on the site. The `service`
 // field in the request body picks which validation, table and copy apply —
 // add a new branch here when a new solutions page gets its own quote form.
-import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import { after, NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { isValidEmail, isValidMalaysianPhone } from '@/lib/lead-validation';
+import { sendEmail, SITE_URL, TEAM_INBOX } from '@/lib/email/send';
+import { linkEnquiry, logEmailSent } from '@/lib/admin/client-link';
+import {
+  quoteConfirmation,
+  quoteTeamAlert,
+  type EmailRow,
+  type QuoteService,
+} from '@/lib/email/templates';
 import {
   QUOTE_WEBSITE_TYPE_OPTIONS,
   QUOTE_HAS_WEBSITE_OPTIONS,
@@ -56,8 +63,6 @@ export const runtime = 'nodejs';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const LEAD_FROM_EMAIL = process.env.LEAD_FROM_EMAIL || 'Aurexis Leads <onboarding@resend.dev>';
 
 // In-memory, per-instance — resets on cold start / redeploy and isn't shared
 // across serverless instances. Good enough to blunt casual abuse; not a hard
@@ -77,15 +82,6 @@ function isRateLimited(ip: string): boolean {
   return entry.count > RATE_LIMIT;
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
 async function notifyTelegram(text: string) {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
   try {
@@ -102,52 +98,35 @@ async function notifyTelegram(text: string) {
   }
 }
 
-async function sendConfirmationEmail(opts: {
-  to: string;
-  subject: string;
-  eyebrow: string;
-  heading: string;
-  bodyHtml: string;
-  bodyText: string;
+// Runs after the response so the visitor never waits on Resend or the client
+// database. Order matters: link the enquiry to a client first, then email, then
+// log the confirmation on that client's timeline.
+function sendQuoteEmails(o: {
+  service: QuoteService;
+  id: string;
+  name: string;
+  email: string;
+  whatsapp: string;
+  choice: string;
+  rows: EmailRow[];
 }) {
-  if (!RESEND_API_KEY) {
-    console.warn('[/api/quote-request] RESEND_API_KEY not set — confirmation email not sent.');
-    return;
-  }
-  try {
-    const resend = new Resend(RESEND_API_KEY);
-    const { error } = await resend.emails.send({
-      from: LEAD_FROM_EMAIL,
-      to: opts.to,
-      subject: opts.subject,
-      html: `<!doctype html>
-<html><body style="margin:0;padding:0;background:#02040A;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#f5f5f7;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#02040A;padding:24px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="520" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;background:#0A0B12;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;">
-        <tr><td style="padding:28px 28px 20px;">
-          <div style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:rgba(94,227,218,0.9);">
-            ${escapeHtml(opts.eyebrow)}
-          </div>
-          <h1 style="font-family:Georgia,serif;font-style:italic;font-size:24px;font-weight:400;color:#fff;margin:10px 0 0;letter-spacing:-0.01em;">
-            ${opts.heading}
-          </h1>
-        </td></tr>
-        <tr><td style="padding:0 28px 28px;">
-          ${opts.bodyHtml}
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body></html>`,
-      text: opts.bodyText,
+  const adminUrl = `${SITE_URL}/admin/command?lead=${encodeURIComponent(`${o.service}:${o.id}`)}`;
+  after(async () => {
+    const clientId = await linkEnquiry({
+      source: o.service,
+      leadId: o.id,
+      name: o.name,
+      email: o.email,
+      phone: o.whatsapp,
+      headline: `${o.choice}: ${o.rows[0]?.value ?? ''}`,
     });
-    if (error) {
-      console.error('[/api/quote-request] Resend error:', error);
-    }
-  } catch (err) {
-    console.error('[/api/quote-request] Resend exception:', err);
-  }
+    const confirmation = quoteConfirmation(o);
+    const [sent] = await Promise.all([
+      sendEmail(o.email, confirmation),
+      sendEmail(TEAM_INBOX, quoteTeamAlert({ ...o, adminUrl: clientId ? `${SITE_URL}/admin/clients/${clientId}` : adminUrl }), o.email),
+    ]);
+    if (clientId && sent.ok) await logEmailSent(clientId, confirmation.subject, o.email, sent.id);
+  });
 }
 
 const WEBSITE_TYPE_SET = new Set(QUOTE_WEBSITE_TYPE_OPTIONS);
@@ -156,7 +135,11 @@ const PRESENCE_TIMELINE_SET = new Set(PRESENCE_TIMELINE_OPTIONS);
 const PRESENCE_BUDGET_SET = new Set(PRESENCE_BUDGET_OPTIONS);
 const MEETING_SET = new Set(QUOTE_MEETING_OPTIONS);
 
-async function handlePresenceQuote(body: Record<string, unknown>, ip: string, userAgent: string | null) {
+async function handlePresenceQuote(
+  body: Record<string, unknown>,
+  ip: string,
+  userAgent: string | null,
+) {
   const {
     websiteType,
     businessDescription,
@@ -261,19 +244,24 @@ async function handlePresenceQuote(body: Record<string, unknown>, ip: string, us
     ].join('\n'),
   );
 
-  await sendConfirmationEmail({
-    to: cleanEmail,
-    subject: 'We received your quote request',
-    eyebrow: 'Aurexis · Presence',
-    heading: `Thanks, ${escapeHtml(cleanName)} — we&rsquo;ve got it.`,
-    bodyHtml: `<p style="font-size:14px;line-height:1.6;color:rgba(255,255,255,0.65);margin:0 0 12px;">
-            We received your quote request for a <b style="color:#fff;">${escapeHtml(websiteType as string)}</b>.
-            We&rsquo;ll review what you&rsquo;ve sent and WhatsApp you at ${escapeHtml(cleanWhatsapp)} within a business day to book a short call.
-          </p>
-          <p style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.4);margin:0;">
-            In a hurry? Message us directly on WhatsApp: +60 16-407 1129.
-          </p>`,
-    bodyText: `Thanks, ${cleanName} — we've got it.\n\nWe received your quote request for a ${websiteType}. We'll review what you've sent and WhatsApp you at ${cleanWhatsapp} within a business day to book a short call.\n\nIn a hurry? Message us on WhatsApp: +60 16-407 1129.`,
+  sendQuoteEmails({
+    service: 'presence',
+    id: insertData.id,
+    name: cleanName,
+    email: cleanEmail,
+    whatsapp: cleanWhatsapp,
+    choice: websiteType as string,
+    rows: [
+      { label: 'Your business', value: (businessDescription as string).trim() },
+      { label: 'Website today', value: hasWebsite as string },
+      { label: 'Timeline', value: timeline as string },
+      { label: 'Budget', value: budget as string },
+      {
+        label: 'Meeting',
+        value: `${meetingPreference}${cleanAddress ? ` at ${cleanAddress}` : ''}`,
+      },
+      { label: 'Notes', value: cleanNotes ?? '' },
+    ],
   });
 
   return NextResponse.json({ ok: true, id: insertData.id });
@@ -286,7 +274,11 @@ const CONNECT_TIMELINE_SET = new Set(CONNECT_TIMELINE_OPTIONS);
 const CONNECT_BUDGET_SET = new Set(CONNECT_BUDGET_OPTIONS);
 const CONNECT_MEETING_SET = new Set(CONNECT_MEETING_OPTIONS);
 
-async function handleConnectQuote(body: Record<string, unknown>, ip: string, userAgent: string | null) {
+async function handleConnectQuote(
+  body: Record<string, unknown>,
+  ip: string,
+  userAgent: string | null,
+) {
   const {
     tier,
     businessDescription,
@@ -312,7 +304,10 @@ async function handleConnectQuote(body: Record<string, unknown>, ip: string, use
   if (typeof hasMetaAccount !== 'string' || !HAS_META_SET.has(hasMetaAccount as never)) {
     errors.hasMetaAccount = 'Please pick a valid option.';
   }
-  if (typeof enquiriesPerMonth !== 'string' || !ENQUIRY_VOLUME_SET.has(enquiriesPerMonth as never)) {
+  if (
+    typeof enquiriesPerMonth !== 'string' ||
+    !ENQUIRY_VOLUME_SET.has(enquiriesPerMonth as never)
+  ) {
     errors.enquiriesPerMonth = 'Please pick a valid range.';
   }
   if (typeof timeline !== 'string' || !CONNECT_TIMELINE_SET.has(timeline as never)) {
@@ -321,7 +316,10 @@ async function handleConnectQuote(body: Record<string, unknown>, ip: string, use
   if (typeof budget !== 'string' || !CONNECT_BUDGET_SET.has(budget as never)) {
     errors.budget = 'Please pick a valid budget.';
   }
-  if (typeof meetingPreference !== 'string' || !CONNECT_MEETING_SET.has(meetingPreference as never)) {
+  if (
+    typeof meetingPreference !== 'string' ||
+    !CONNECT_MEETING_SET.has(meetingPreference as never)
+  ) {
     errors.meetingPreference = 'Please pick online or face to face.';
   }
   const faceToFace = meetingPreference === 'Face to face';
@@ -397,19 +395,25 @@ async function handleConnectQuote(body: Record<string, unknown>, ip: string, use
     ].join('\n'),
   );
 
-  await sendConfirmationEmail({
-    to: cleanEmail,
-    subject: 'We received your Connect quote request',
-    eyebrow: 'Aurexis · Connect',
-    heading: `Thanks, ${escapeHtml(cleanName)} — we&rsquo;ve got it.`,
-    bodyHtml: `<p style="font-size:14px;line-height:1.6;color:rgba(255,255,255,0.65);margin:0 0 12px;">
-            We received your Connect quote request for the <b style="color:#fff;">${escapeHtml(tier as string)}</b> tier.
-            We&rsquo;ll review what you&rsquo;ve sent and WhatsApp you at ${escapeHtml(cleanWhatsapp)} within a business day to book a short call.
-          </p>
-          <p style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.4);margin:0;">
-            In a hurry? Message us directly on WhatsApp: +60 16-407 1129.
-          </p>`,
-    bodyText: `Thanks, ${cleanName} — we've got it.\n\nWe received your Connect quote request for the ${tier} tier. We'll review what you've sent and WhatsApp you at ${cleanWhatsapp} within a business day to book a short call.\n\nIn a hurry? Message us on WhatsApp: +60 16-407 1129.`,
+  sendQuoteEmails({
+    service: 'connect',
+    id: insertData.id,
+    name: cleanName,
+    email: cleanEmail,
+    whatsapp: cleanWhatsapp,
+    choice: tier as string,
+    rows: [
+      { label: 'Your business', value: (businessDescription as string).trim() },
+      { label: 'Meta Business account', value: hasMetaAccount as string },
+      { label: 'Enquiries a month', value: enquiriesPerMonth as string },
+      { label: 'Timeline', value: timeline as string },
+      { label: 'Budget', value: budget as string },
+      {
+        label: 'Meeting',
+        value: `${meetingPreference}${cleanAddress ? ` at ${cleanAddress}` : ''}`,
+      },
+      { label: 'Notes', value: cleanNotes ?? '' },
+    ],
   });
 
   return NextResponse.json({ ok: true, id: insertData.id });
@@ -423,7 +427,11 @@ const FLOW_TIMELINE_SET = new Set(FLOW_TIMELINE_OPTIONS);
 const FLOW_BUDGET_SET = new Set(FLOW_BUDGET_OPTIONS);
 const FLOW_MEETING_SET = new Set(FLOW_MEETING_OPTIONS);
 
-async function handleFlowQuote(body: Record<string, unknown>, ip: string, userAgent: string | null) {
+async function handleFlowQuote(
+  body: Record<string, unknown>,
+  ip: string,
+  userAgent: string | null,
+) {
   const {
     tier,
     businessDescription,
@@ -447,7 +455,10 @@ async function handleFlowQuote(body: Record<string, unknown>, ip: string, userAg
   if (typeof businessDescription !== 'string' || businessDescription.trim().length === 0) {
     errors.businessDescription = 'Tell us what your business does.';
   }
-  if (typeof accountingPackage !== 'string' || !ACCOUNTING_PACKAGE_SET.has(accountingPackage as never)) {
+  if (
+    typeof accountingPackage !== 'string' ||
+    !ACCOUNTING_PACKAGE_SET.has(accountingPackage as never)
+  ) {
     errors.accountingPackage = 'Please pick a valid option.';
   }
   if (typeof adminHoursPerWeek !== 'string' || !ADMIN_HOURS_SET.has(adminHoursPerWeek as never)) {
@@ -540,19 +551,26 @@ async function handleFlowQuote(body: Record<string, unknown>, ip: string, userAg
     ].join('\n'),
   );
 
-  await sendConfirmationEmail({
-    to: cleanEmail,
-    subject: 'We received your Flow quote request',
-    eyebrow: 'Aurexis · Flow',
-    heading: `Thanks, ${escapeHtml(cleanName)} — we&rsquo;ve got it.`,
-    bodyHtml: `<p style="font-size:14px;line-height:1.6;color:rgba(255,255,255,0.65);margin:0 0 12px;">
-            We received your Flow quote request for the <b style="color:#fff;">${escapeHtml(tier as string)}</b> tier.
-            We&rsquo;ll review what you&rsquo;ve sent and WhatsApp you at ${escapeHtml(cleanWhatsapp)} within a business day to book a short call.
-          </p>
-          <p style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.4);margin:0;">
-            In a hurry? Message us directly on WhatsApp: +60 16-407 1129.
-          </p>`,
-    bodyText: `Thanks, ${cleanName} — we've got it.\n\nWe received your Flow quote request for the ${tier} tier. We'll review what you've sent and WhatsApp you at ${cleanWhatsapp} within a business day to book a short call.\n\nIn a hurry? Message us on WhatsApp: +60 16-407 1129.`,
+  sendQuoteEmails({
+    service: 'flow',
+    id: insertData.id,
+    name: cleanName,
+    email: cleanEmail,
+    whatsapp: cleanWhatsapp,
+    choice: tier as string,
+    rows: [
+      { label: 'Your business', value: (businessDescription as string).trim() },
+      { label: 'Accounting software', value: accountingPackage as string },
+      { label: 'Admin hours a week', value: adminHoursPerWeek as string },
+      { label: 'LHDN e-Invoice', value: lhdnStatus as string },
+      { label: 'Timeline', value: timeline as string },
+      { label: 'Budget', value: budget as string },
+      {
+        label: 'Meeting',
+        value: `${meetingPreference}${cleanAddress ? ` at ${cleanAddress}` : ''}`,
+      },
+      { label: 'Notes', value: cleanNotes ?? '' },
+    ],
   });
 
   return NextResponse.json({ ok: true, id: insertData.id });
@@ -566,7 +584,11 @@ const CORE_TIMELINE_SET = new Set(CORE_TIMELINE_OPTIONS);
 const CORE_BUDGET_SET = new Set(CORE_BUDGET_OPTIONS);
 const CORE_MEETING_SET = new Set(CORE_MEETING_OPTIONS);
 
-async function handleCoreQuote(body: Record<string, unknown>, ip: string, userAgent: string | null) {
+async function handleCoreQuote(
+  body: Record<string, unknown>,
+  ip: string,
+  userAgent: string | null,
+) {
   const {
     tier,
     businessDescription,
@@ -683,19 +705,26 @@ async function handleCoreQuote(body: Record<string, unknown>, ip: string, userAg
     ].join('\n'),
   );
 
-  await sendConfirmationEmail({
-    to: cleanEmail,
-    subject: 'We received your Core quote request',
-    eyebrow: 'Aurexis · Core',
-    heading: `Thanks, ${escapeHtml(cleanName)} — we&rsquo;ve got it.`,
-    bodyHtml: `<p style="font-size:14px;line-height:1.6;color:rgba(255,255,255,0.65);margin:0 0 12px;">
-            We received your Core quote request for the <b style="color:#fff;">${escapeHtml(tier as string)}</b> tier.
-            We&rsquo;ll review what you&rsquo;ve sent and WhatsApp you at ${escapeHtml(cleanWhatsapp)} within a business day to book a discovery call.
-          </p>
-          <p style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.4);margin:0;">
-            In a hurry? Message us directly on WhatsApp: +60 16-407 1129.
-          </p>`,
-    bodyText: `Thanks, ${cleanName} — we've got it.\n\nWe received your Core quote request for the ${tier} tier. We'll review what you've sent and WhatsApp you at ${cleanWhatsapp} within a business day to book a discovery call.\n\nIn a hurry? Message us on WhatsApp: +60 16-407 1129.`,
+  sendQuoteEmails({
+    service: 'core',
+    id: insertData.id,
+    name: cleanName,
+    email: cleanEmail,
+    whatsapp: cleanWhatsapp,
+    choice: tier as string,
+    rows: [
+      { label: 'Your business', value: (businessDescription as string).trim() },
+      { label: 'Monthly SaaS spend', value: saasSpend as string },
+      { label: 'Biggest bottleneck', value: bottleneck as string },
+      { label: 'Data to move', value: dataMigration as string },
+      { label: 'Timeline', value: timeline as string },
+      { label: 'Budget', value: budget as string },
+      {
+        label: 'Meeting',
+        value: `${meetingPreference}${cleanAddress ? ` at ${cleanAddress}` : ''}`,
+      },
+      { label: 'Notes', value: cleanNotes ?? '' },
+    ],
   });
 
   return NextResponse.json({ ok: true, id: insertData.id });
@@ -707,7 +736,11 @@ const BIGGEST_QUESTION_SET = new Set(QUOTE_BIGGEST_QUESTION_OPTIONS);
 const GRANT_INTEREST_SET = new Set(QUOTE_GRANT_INTEREST_OPTIONS);
 const AUDIT_MEETING_SET = new Set(AUDIT_MEETING_OPTIONS);
 
-async function handleAuditQuote(body: Record<string, unknown>, ip: string, userAgent: string | null) {
+async function handleAuditQuote(
+  body: Record<string, unknown>,
+  ip: string,
+  userAgent: string | null,
+) {
   const {
     tier,
     businessDescription,
@@ -812,19 +845,24 @@ async function handleAuditQuote(body: Record<string, unknown>, ip: string, userA
     ].join('\n'),
   );
 
-  await sendConfirmationEmail({
-    to: cleanEmail,
-    subject: 'We received your AI Readiness Audit request',
-    eyebrow: 'Aurexis · AI Readiness Audit',
-    heading: `Thanks, ${escapeHtml(cleanName)} — we&rsquo;ve got it.`,
-    bodyHtml: `<p style="font-size:14px;line-height:1.6;color:rgba(255,255,255,0.65);margin:0 0 12px;">
-            We received your request for the <b style="color:#fff;">${escapeHtml(tier as string)}</b> AI Readiness Audit.
-            We&rsquo;ll review what you&rsquo;ve sent and WhatsApp you at ${escapeHtml(cleanWhatsapp)} within a business day to confirm scope and start the audit.
-          </p>
-          <p style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.4);margin:0;">
-            In a hurry? Message us directly on WhatsApp: +60 16-407 1129.
-          </p>`,
-    bodyText: `Thanks, ${cleanName} — we've got it.\n\nWe received your request for the ${tier} AI Readiness Audit. We'll review what you've sent and WhatsApp you at ${cleanWhatsapp} within a business day to confirm scope and start the audit.\n\nIn a hurry? Message us on WhatsApp: +60 16-407 1129.`,
+  sendQuoteEmails({
+    service: 'audit',
+    id: insertData.id,
+    name: cleanName,
+    email: cleanEmail,
+    whatsapp: cleanWhatsapp,
+    choice: tier as string,
+    rows: [
+      { label: 'Your business', value: (businessDescription as string).trim() },
+      { label: 'Where you are with AI', value: aiStage as string },
+      { label: 'Biggest question', value: biggestQuestion as string },
+      { label: 'Grant screening', value: grantInterest as string },
+      {
+        label: 'Meeting',
+        value: `${meetingPreference}${cleanAddress ? ` at ${cleanAddress}` : ''}`,
+      },
+      { label: 'Notes', value: cleanNotes ?? '' },
+    ],
   });
 
   return NextResponse.json({ ok: true, id: insertData.id });

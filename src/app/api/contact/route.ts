@@ -1,6 +1,9 @@
 // src/app/api/contact/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { after, NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
+import { sendEmail, SITE_URL, TEAM_INBOX } from '@/lib/email/send';
+import { linkEnquiry, logEmailSent } from '@/lib/admin/client-link';
+import { contactConfirmation, teamLeadAlert } from '@/lib/email/templates';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -76,22 +79,69 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Auto-create a "Reply to X" task in the admin planner for tomorrow (SLA).
-    // Silent-fail — don't block the contact response if this insert errors.
+    const clean = {
+      name: (name as string).trim(),
+      email: (email as string).trim(),
+      phone: (phone as string).trim(),
+      message: (message as string).trim(),
+    };
+    after(async () => {
+      const clientId = await linkEnquiry({
+        source: 'contact',
+        leadId: insertData.id,
+        name: clean.name,
+        email: clean.email,
+        phone: clean.phone,
+        headline: clean.message,
+      });
+      const confirmation = contactConfirmation({
+        name: clean.name,
+        intent: intent as string,
+        message: clean.message,
+      });
+      const [sent] = await Promise.all([
+        sendEmail(clean.email, confirmation),
+        sendEmail(
+          TEAM_INBOX,
+          teamLeadAlert({
+            source: 'Contact',
+            name: clean.name,
+            email: clean.email,
+            phone: clean.phone,
+            rows: [
+              { label: 'Topic', value: intent as string },
+              { label: 'Company', value: typeof company === 'string' ? company.trim() : '' },
+              { label: 'Stage', value: typeof stage === 'string' ? stage.trim() : '' },
+              { label: 'Message', value: clean.message },
+            ],
+            adminUrl: clientId
+              ? `${SITE_URL}/admin/clients/${clientId}`
+              : `${SITE_URL}/admin/command?lead=${encodeURIComponent(`contact:${insertData.id}`)}`,
+          }),
+          clean.email,
+        ),
+      ]);
+      if (clientId && sent.ok) await logEmailSent(clientId, confirmation.subject, clean.email, sent.id);
+    });
+
+    // Put a "Reply to X" task on the admin calendar for tomorrow 10:00 Malaysia time
+    // (the reply SLA), with a phone reminder. Never blocks the response.
     try {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      await supabaseAdmin.from('planner_events').insert({
+      const day = new Date(Date.now() + 8 * 3_600_000 + 24 * 3_600_000).toISOString().slice(0, 10);
+      const start = new Date(`${day}T10:00:00+08:00`);
+      await supabaseAdmin.from('calendar_events').insert({
         title: `Reply to ${(name as string).trim()}`,
-        event_date: tomorrow.toISOString().slice(0, 10),
-        type: 'task',
-        priority: 'high',
-        notes: `Intent: ${intent}\n\n${(message as string).trim()}`,
-        linked_entity_type: 'contact_message',
-        linked_entity_id: insertData.id,
+        kind: 'task',
+        starts_at: start.toISOString(),
+        ends_at: new Date(start.getTime() + 30 * 60_000).toISOString(),
+        attendee: (name as string).trim(),
+        notes: `Intent: ${intent}\n\n${(message as string).trim()}`.slice(0, 2000),
+        lead_ref: `contact:${insertData.id}`,
+        reminders: [15],
+        send_invite: false,
       });
     } catch (err) {
-      console.error('[/api/contact] planner auto-create failed:', err);
+      console.error('[/api/contact] calendar task failed:', err);
     }
 
     // Fire-and-forget Telegram notification if configured
@@ -113,18 +163,15 @@ export async function POST(request: NextRequest) {
       ].join('\n');
 
       try {
-        const res = await fetch(
-          `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              chat_id: TELEGRAM_CHAT_ID,
-              text,
-              parse_mode: 'Markdown',
-            }),
-          },
-        );
+        const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text,
+            parse_mode: 'Markdown',
+          }),
+        });
         if (res.ok) {
           await supabaseAdmin
             .from('contact_messages')
