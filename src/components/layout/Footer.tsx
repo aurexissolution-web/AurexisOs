@@ -92,7 +92,7 @@ const SOCIAL_LINKS = [
 const COMPLIANCE = [
   "LHDN-Ready",
   "PDPA-Compliant",
-  "SST-Registered",
+  "SSM-Registered",
   "Built in Malaysia",
 ];
 

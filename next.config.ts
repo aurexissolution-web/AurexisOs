@@ -17,7 +17,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https://images.unsplash.com https://www.cult-ui.com https://i.postimg.cc https://*.supabase.co https://api.dicebear.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://openrouter.ai https://fonts.gstatic.com https://fonts.googleapis.com https://app.cal.com https://api.dicebear.com",
-      "frame-src 'self' https://app.cal.com",
+      "frame-src 'self' blob: https://app.cal.com",
       "media-src 'self' blob:",
       "worker-src 'self' blob:",
       "object-src 'none'",
@@ -30,6 +30,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  serverExternalPackages: ["@react-pdf/renderer"],
+  outputFileTracingIncludes: {
+    "/api/documents/**": ["./src/assets/**"],
+  },
   images: {
     remotePatterns: [
       {

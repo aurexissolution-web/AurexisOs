@@ -296,5 +296,5 @@ export const CLOSING_TERMS = [
   'Care plans are billed monthly. Minimum 6 months, then month-to-month.',
   'Setup: staged payments tied to delivery milestones, agreed in writing before work begins.',
   'Add-ons are quoted individually and confirmed before work starts.',
-  'Prices shown are typical ranges, not fixed quotes. Prices exclude SST where applicable. All prices in Malaysian Ringgit.',
+  'Prices shown are typical ranges, not fixed quotes. All prices in Malaysian Ringgit.',
 ];

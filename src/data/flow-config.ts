@@ -241,5 +241,5 @@ export const CLOSING_TERMS = [
   'Management plans are billed monthly. Minimum 6 months, then month-to-month.',
   'Setup: 50% to start, 50% on go-live.',
   'Third-party tool costs (accounting software, automation platform subscriptions) are billed separately, at cost.',
-  'Prices shown exclude SST where applicable. All prices in Malaysian Ringgit.',
+  'All prices shown in Malaysian Ringgit.',
 ];

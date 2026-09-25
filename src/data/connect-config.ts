@@ -238,7 +238,7 @@ export const REAL_MONTH_ITEMS: ConnectMonthLineItem[] = [
 export const REAL_MONTH_TOTAL = { label: 'Total', amount: '≈ RM2,646' };
 
 export const REAL_MONTH_FOOTNOTE =
-  'Illustrative only. Your actual Meta cost depends entirely on how many messages you send and in which category. Malaysian SST of 8% applies to digital services and platform fees where relevant.';
+  'Illustrative only. Your actual Meta cost depends entirely on how many messages you send and in which category.';
 
 export const BILLING_COMPLIANCE_NOTE =
   'Compliance is built in from Growth upward — recorded opt-in capture, an unsubscribe path that actually works, and a contact list that separates consented from non-consented numbers. PDPA 2024 penalties reach RM1,000,000; direct-marketing breaches up to RM200,000 or 2 years. Broadcasting without compliance is what gets accounts banned and businesses fined.';

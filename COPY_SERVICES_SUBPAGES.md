@@ -130,7 +130,7 @@ Shared component. "Services" parent link active; "AI" highlighted in dropdown.
 *"Templated outputs from a few inputs. Quotes, proposals, contracts, intake forms, compliance reports — generated in seconds, branded to your business."*
 
 **05 — Compliance Automations**
-*"LHDN e-invoice generation. PDPA logging. SST reporting. Audit trails. The compliance work done invisibly, every day, with no manual touching."*
+*"LHDN e-invoice generation. PDPA logging. Audit trails. The compliance work done invisibly, every day, with no manual touching."*
 
 ---
 
@@ -231,7 +231,7 @@ Shared component. "Services" parent link active; "AI" highlighted in dropdown.
 *"Yes. Multilingual is a Malaysian advantage we lean into. Most of our agents handle English + Bahasa Malaysia, sometimes plus Mandarin or Tamil depending on your customer mix."*
 
 **Q5 — Will my data be safe?**
-*"Your data is yours. We use API access (no training on your data). We sign DPAs. PDPA-compliant by design — minimal data collection, encrypted at rest, documented data flows. We're SST-registered."*
+*"Your data is yours. We use API access (no training on your data). We sign DPAs. PDPA-compliant by design — minimal data collection, encrypted at rest, documented data flows."*
 
 ---
 

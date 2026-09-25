@@ -6,8 +6,10 @@ import { ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { signIn } from '@/app/admin/actions';
 import { Button, Input, Label } from './ui';
 
-export function LoginForm() {
-  const [state, action, pending] = useActionState(signIn, undefined);
+type LoginAction = (prev: { error?: string } | undefined, formData: FormData) => Promise<{ error?: string }>;
+
+export function LoginForm({ action: submit = signIn }: { action?: LoginAction }) {
+  const [state, action, pending] = useActionState(submit, undefined);
   const [show, setShow] = useState(false);
 
   return (

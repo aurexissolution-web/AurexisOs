@@ -1,5 +1,7 @@
 // src/app/admin/login/page.tsx
 import Image from 'next/image';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { getAdminUser } from '@/lib/auth/admin';
 import { LoginForm } from '@/components/admin/LoginForm';
@@ -42,6 +44,16 @@ export default async function AdminLoginPage() {
         <p className="mt-6 text-center text-[12px] text-white/50 [text-shadow:0_0_10px_rgba(0,0,0,0.8)]">
           Admin accounts only. Access is checked on every page.
         </p>
+
+        <div className="mt-5 flex justify-center">
+          <Link
+            href="/"
+            className="inline-flex h-10 items-center gap-2 rounded-full border border-white/[0.16] bg-[#05070C]/60 px-5 text-[13px] font-medium text-white/80 backdrop-blur-xl outline-none transition-colors hover:border-[#5EE3DA]/50 hover:text-white focus-visible:ring-2 focus-visible:ring-[#5EE3DA]/60"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Back to website
+          </Link>
+        </div>
       </div>
     </main>
   );

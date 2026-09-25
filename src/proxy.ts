@@ -1,5 +1,5 @@
 // src/proxy.ts
-// Keeps the Supabase session cookie fresh on /admin requests (access tokens
+// Keeps the Supabase session cookie fresh on /admin, /documents and /accounts requests (access tokens
 // expire hourly; server components can't write cookies themselves).
 // This is NOT the security boundary — requireAdmin() is. It only refreshes.
 import { NextResponse, type NextRequest } from 'next/server';
@@ -28,5 +28,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/documents/:path*', '/accounts/:path*'],
 };

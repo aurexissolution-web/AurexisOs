@@ -125,5 +125,5 @@ export const QUOTE_MEETING_OPTIONS: AuditMeetingPreference[] = ['Online', 'Face 
 export const CLOSING_TERMS = [
   'Audit fee credited against Core build if signed within 60 days.',
   'Full tier credited against any Core build; Light tier credited against Core Starter or above.',
-  'Prices exclude SST where applicable. All prices in Malaysian Ringgit.',
+  'All prices in Malaysian Ringgit.',
 ];
