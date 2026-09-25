@@ -76,7 +76,7 @@ export function HeroSection() {
       <div className="relative z-10 w-full flex-1 flex flex-col items-center justify-center text-center px-6 pt-24 pb-28 md:pt-28 md:pb-36">
         <motion.div {...reveal(0.05)}>
           <Link
-            href="/contact"
+            href="/solutions"
             className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-[var(--color-electric-cyan)]/15 bg-white/[0.04] backdrop-blur-xl text-sm text-[#cbd5e1] mb-8 transition-all hover:border-[var(--color-electric-cyan)]/35 hover:bg-white/[0.07]"
             style={{ boxShadow: "0 0 28px rgba(0,240,255,0.10), 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.14)" }}
           >
@@ -89,7 +89,7 @@ export function HeroSection() {
               Introducing
             </span>
             <span aria-hidden className="text-white/25">·</span>
-            <span className="text-white">The Aurexis Ecosystem</span>
+            <span className="text-white">AI Readiness Audit</span>
             <ArrowRight className="w-3.5 h-3.5 text-[var(--color-electric-cyan)] group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </motion.div>
