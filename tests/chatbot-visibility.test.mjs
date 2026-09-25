@@ -18,3 +18,10 @@ test("keeps the chatbot visible on other public routes", () => {
   assert.equal(shouldHideChatbot("/services"), false);
   assert.equal(shouldHideChatbot("/sanjay-profile"), false);
 });
+
+test("hides the floating chatbot on /solutions, which has its own chat", () => {
+  assert.equal(shouldHideChatbot("/solutions"), true);
+  assert.equal(shouldHideChatbot("/solutions/"), true);
+  assert.equal(shouldHideChatbot("/solutions/presence"), false);
+  assert.equal(shouldHideChatbot("/solutions/ai-readiness-audit"), false);
+});

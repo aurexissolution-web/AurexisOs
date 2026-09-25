@@ -40,11 +40,7 @@ export interface HeroChatSolution {
   priceLabel: string;
 }
 
-// TEMPORARY: no real services PDF exists in the repo yet. This placeholder
-// file (public/aurexis-services-placeholder.pdf) exists only to verify the
-// download button works end-to-end. Swap this constant for the real asset
-// path before shipping — do not present the placeholder's content as real.
-const SERVICES_PDF_HREF = "/aurexis-services-placeholder.pdf";
+const SERVICES_PDF_HREF = "/aurexis-pricing.pdf";
 
 /**
  * Purely a visual selector — like the model picker it replaces, choosing an
@@ -60,6 +56,9 @@ function SolutionPicker({ solutions }: { solutions: HeroChatSolution[] }) {
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
+        onKeyDown={(e) => e.key === "Escape" && setIsOpen(false)}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
         className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium text-[#8a8a8f] transition-all duration-200 hover:bg-white/5 hover:text-white active:scale-95"
       >
         <Layers className="size-3.5" strokeWidth={1.5} />
@@ -70,7 +69,7 @@ function SolutionPicker({ solutions }: { solutions: HeroChatSolution[] }) {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute bottom-full left-0 z-50 mb-2 min-w-[240px] overflow-hidden rounded-xl border border-white/10 bg-[#1a1a1e]/95 shadow-2xl shadow-black/50 backdrop-blur-xl">
+          <div className="absolute left-0 top-full z-50 mt-2 min-w-[280px] overflow-hidden rounded-xl border border-white/10 bg-[#1a1a1e]/[0.98] shadow-2xl shadow-black/50 backdrop-blur-xl">
             <div className="p-1.5">
               <div className="px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#5a5a5f]">
                 Select Solution
@@ -85,7 +84,9 @@ function SolutionPicker({ solutions }: { solutions: HeroChatSolution[] }) {
                 }`}
               >
                 <span className="flex-1 text-sm font-medium">All solutions</span>
-                {selected === null && <Check className="size-4 shrink-0 text-[#5EE3DA]" />}
+                <Check
+                  className={`size-4 shrink-0 text-[#5EE3DA] ${selected === null ? "" : "invisible"}`}
+                />
               </button>
               {solutions.map((s) => (
                 <button
@@ -98,11 +99,11 @@ function SolutionPicker({ solutions }: { solutions: HeroChatSolution[] }) {
                     selected?.name === s.name ? "bg-white/10 text-white" : "text-[#a0a0a5] hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <div className="min-w-0 flex-1">
-                    <span className="text-sm font-medium">{s.name}</span>
-                    <span className="block text-[11px] text-[#6a6a6f]">{s.priceLabel}</span>
-                  </div>
-                  {selected?.name === s.name && <Check className="size-4 shrink-0 text-[#5EE3DA]" />}
+                  <span className="flex-1 text-sm font-medium">{s.name}</span>
+                  <span className="text-[11px] tabular-nums text-[#6a6a6f]">{s.priceLabel}</span>
+                  <Check
+                    className={`size-4 shrink-0 text-[#5EE3DA] ${selected?.name === s.name ? "" : "invisible"}`}
+                  />
                 </button>
               ))}
             </div>
@@ -131,9 +132,9 @@ function DownloadPdfButton() {
   return (
     <a
       href={SERVICES_PDF_HREF}
-      download
-      title="Download services PDF"
-      aria-label="Download services PDF"
+      download="Aurexis-Pricing.pdf"
+      title="Download our pricing (PDF)"
+      aria-label="Download our pricing (PDF)"
       className="flex size-8 items-center justify-center rounded-full text-[#8a8a8f] transition-colors hover:bg-white/5 hover:text-white"
     >
       <Download className="size-4" strokeWidth={1.5} />
@@ -399,12 +400,12 @@ export function HeroChat({
         <div className="mb-6 mt-2 w-full max-w-[700px]">
           <div className="relative">
             <div className="pointer-events-none absolute -inset-[1px] rounded-2xl bg-gradient-to-b from-white/[0.08] to-transparent" />
-            <div className="relative flex flex-col overflow-hidden rounded-2xl bg-[#1e1e22] ring-1 ring-white/[0.08] shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_2px_20px_rgba(0,0,0,0.4)]">
+            <div className="relative flex flex-col rounded-2xl bg-[#1e1e22] ring-1 ring-white/[0.08] shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_2px_20px_rgba(0,0,0,0.4)]">
               {hasConversation && (
                 <div
                   ref={threadRef}
                   aria-live="polite"
-                  className="max-h-[360px] space-y-3 overflow-y-auto border-b border-white/[0.08] px-4 py-4 text-left"
+                  className="max-h-[360px] space-y-3 overflow-y-auto rounded-t-2xl border-b border-white/[0.08] px-4 py-4 text-left"
                 >
                   {messages.map((m) => (
                     <div

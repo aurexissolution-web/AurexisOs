@@ -253,9 +253,10 @@ export function Navbar() {
         <div className="mx-auto flex h-[72px] w-full max-w-[1280px] items-center justify-between px-6 lg:px-8">
           <NavLogo />
 
-          <div className="flex items-center gap-2 md:gap-5">
-            <div className="hidden md:block">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="hidden items-center gap-3 md:flex">
               <ContactCTA variant="text" />
+              <span aria-hidden className="h-3.5 w-px bg-white/15" />
             </div>
             <button
               ref={triggerRef}
@@ -264,7 +265,7 @@ export function Navbar() {
               aria-label="Open menu"
               aria-expanded={mobileOpen}
               aria-controls="primary-menu"
-              className="group flex min-h-[44px] items-center gap-3 rounded-full px-3 text-[10px] uppercase tracking-[0.22em] text-white/70 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-[#00F0FF]/60 font-mono"
+              className="group flex min-h-[44px] items-center gap-3 rounded-full px-3 text-[10.5px] uppercase tracking-[0.22em] text-white/70 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-[#00F0FF]/60 font-mono"
             >
               Menu
               <span aria-hidden className="flex flex-col gap-[5px]">

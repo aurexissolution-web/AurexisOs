@@ -36,7 +36,7 @@ export function ContactCTA({
         variant === "outline" &&
           "border border-[#00F0FF]/40 px-4 py-1.5 text-[13.5px] text-[#00F0FF] hover:border-[#00F0FF]/80 hover:bg-[#00F0FF]/[0.08]",
         variant === "text" &&
-          "px-1 py-2 text-[13px] text-white/70 hover:text-white",
+          "min-h-[44px] gap-2 px-3 font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/70 hover:text-white",
         variant === "compact" &&
           "h-10 w-full bg-white px-5 text-[14px] font-semibold text-black hover:bg-white/90",
         className,
@@ -62,7 +62,7 @@ export function ContactCTA({
       {variant === "text" && (
         <ArrowUpRight
           aria-hidden
-          className="relative z-10 h-3.5 w-3.5 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+          className="relative z-10 h-3 w-3 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
         />
       )}
     </Link>
