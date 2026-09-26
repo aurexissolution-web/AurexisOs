@@ -30,7 +30,7 @@ export default async function NewProposalPage() {
   const initial: ProposalState = {
     ref: proposalRef('presence', 'CLI', year, nextSequence(`AUR-PRES-CLI-${year}-`, refs, 0)),
     date: today, product: 'presence', title: 'Corporate Capability\nWebsite Proposal', clientName: '', clientId: null, price: 0,
-    sections: defaultSections('', 'presence', 0),
+    sections: defaultSections('presence', 0),
   };
 
   return (

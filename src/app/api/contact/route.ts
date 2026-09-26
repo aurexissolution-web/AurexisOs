@@ -4,6 +4,8 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 import { sendEmail, SITE_URL, TEAM_INBOX } from '@/lib/email/send';
 import { linkEnquiry, logEmailSent } from '@/lib/admin/client-link';
 import { contactConfirmation, teamLeadAlert } from '@/lib/email/templates';
+import { cap, clientIp, isHoneypot, rateLimited } from '@/lib/spam';
+import { telegramBody } from '@/lib/telegram';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -33,8 +35,21 @@ const PHONE_RE = /^[+\d][\d\s\-().]{6,24}$/;
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { intent, name, email, phone, company, stage, message } = body as Record<string, unknown>;
+    if (rateLimited(`contact:${clientIp(request)}`, 5, 60 * 60_000)) {
+      return NextResponse.json({ error: 'Too many messages from here. Please try again later, or WhatsApp us directly.' }, { status: 429 });
+    }
+    const body = (await request.json()) as Record<string, unknown>;
+    if (isHoneypot(body)) return NextResponse.json({ ok: true });
+    const intent = body.intent;
+    const name = cap(body.name, 120);
+    const email = cap(body.email, 160);
+    const phone = cap(body.phone, 32);
+    const company = cap(body.company, 160);
+    const stage = cap(body.stage, 80);
+    const message = cap(body.message, 4000);
+    if (email && rateLimited(`contact-email:${email.toLowerCase()}`, 2, 60 * 60_000)) {
+      return NextResponse.json({ ok: true });
+    }
 
     const errors: Errors = {};
     if (typeof intent !== 'string' || !VALID_INTENTS.has(intent)) {
@@ -166,11 +181,7 @@ export async function POST(request: NextRequest) {
         const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text,
-            parse_mode: 'Markdown',
-          }),
+          body: telegramBody(TELEGRAM_CHAT_ID, text),
         });
         if (res.ok) {
           await supabaseAdmin

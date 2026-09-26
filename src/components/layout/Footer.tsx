@@ -115,9 +115,9 @@ function Hairline() {
 
 function NewsletterForm() {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
-  if (sent) {
+  if (state === "sent") {
     return (
       <div className="mt-3 inline-flex items-center gap-2 text-[13px] text-[var(--color-electric-cyan)]">
         <Check className="w-4 h-4" />
@@ -128,28 +128,49 @@ function NewsletterForm() {
 
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
-        if (!email.includes("@")) return;
-        setSent(true);
+        if (!email.includes("@") || state === "sending") return;
+        const website = new FormData(e.currentTarget).get("website");
+        setState("sending");
+        try {
+          const res = await fetch("/api/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, website, source: "footer" }),
+          });
+          setState(res.ok ? "sent" : "error");
+        } catch {
+          setState("error");
+        }
       }}
-      className="mt-3 flex items-center gap-2 max-w-sm"
+      className="relative mt-3 max-w-sm"
     >
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="you@email.com"
-        aria-label="Email address"
-        className="flex-1 min-w-0 h-10 px-4 rounded-full bg-white/[0.05] border border-white/[0.10] text-[13px] text-white placeholder:text-white/30 focus:border-[var(--color-electric-cyan)]/35 focus:outline-none transition-colors"
-      />
-      <button
-        type="submit"
-        aria-label="Subscribe"
-        className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-[var(--color-electric-cyan)]/15 border border-[var(--color-electric-cyan)]/35 text-[var(--color-electric-cyan)] hover:bg-[var(--color-electric-cyan)]/25 hover:border-[var(--color-electric-cyan)]/50 transition-colors"
-      >
-        <Send className="w-3.5 h-3.5" strokeWidth={2.25} />
-      </button>
+      <div className="flex items-center gap-2">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@email.com"
+          aria-label="Email address"
+          maxLength={160}
+          className="flex-1 min-w-0 h-10 px-4 rounded-full bg-white/[0.05] border border-white/[0.10] text-[13px] text-white placeholder:text-white/30 focus-visible:border-[var(--color-electric-cyan)]/60 focus-visible:ring-2 focus-visible:ring-[var(--color-electric-cyan)]/30 focus:outline-none transition-colors"
+        />
+        <button
+          type="submit"
+          aria-label="Subscribe"
+          disabled={state === "sending"}
+          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-[var(--color-electric-cyan)]/15 border border-[var(--color-electric-cyan)]/35 text-[var(--color-electric-cyan)] hover:bg-[var(--color-electric-cyan)]/25 hover:border-[var(--color-electric-cyan)]/50 transition-colors disabled:opacity-60"
+        >
+          <Send className="w-3.5 h-3.5" strokeWidth={2.25} />
+        </button>
+      </div>
+      <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
+      {state === "error" && (
+        <p role="alert" className="mt-2 text-[12px] text-red-300">
+          Could not subscribe right now. Please try again.
+        </p>
+      )}
     </form>
   );
 }

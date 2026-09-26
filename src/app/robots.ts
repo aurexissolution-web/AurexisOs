@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/seo';
 
-const PRIVATE = ['/admin', '/documents', '/accounts', '/api/', '/portal', '/login', '/chatbot-ui-kit'];
+const PRIVATE = ['/admin', '/documents', '/accounts', '/api/', '/chatbot-ui-kit'];
 
 // AI search and answer crawlers are named on purpose: we want the brand cited.
 const AI_CRAWLERS = [

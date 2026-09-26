@@ -21,6 +21,7 @@ export async function sendEmail(
   email: Email,
   replyTo: string = TEAM_INBOX,
   attachments?: EmailAttachment[],
+  headers?: Record<string, string>,
 ): Promise<{ ok: boolean; id?: string }> {
   if (!resend) {
     console.warn(`[email] RESEND_API_KEY not set, skipped "${email.subject}"`);
@@ -35,6 +36,7 @@ export async function sendEmail(
       html: email.html,
       text: email.text,
       ...(attachments && { attachments }),
+      ...(headers && { headers }),
     });
     if (error) {
       console.error(`[email] Resend error for "${email.subject}":`, error);
@@ -45,4 +47,36 @@ export async function sendEmail(
     console.error(`[email] Resend exception for "${email.subject}":`, err);
     return { ok: false };
   }
+}
+
+/** Sends up to 100 emails per Resend call. Returns how many were accepted. */
+export async function sendBatch(
+  items: { to: string; email: Email; headers?: Record<string, string> }[],
+): Promise<number> {
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY not set, skipped batch');
+    return 0;
+  }
+  let accepted = 0;
+  for (let i = 0; i < items.length; i += 100) {
+    const chunk = items.slice(i, i + 100);
+    try {
+      const { error } = await resend.batch.send(
+        chunk.map((c) => ({
+          from: FROM,
+          to: c.to,
+          replyTo: TEAM_INBOX,
+          subject: c.email.subject,
+          html: c.email.html,
+          text: c.email.text,
+          ...(c.headers && { headers: c.headers }),
+        })),
+      );
+      if (error) console.error('[email] Resend batch error:', error);
+      else accepted += chunk.length;
+    } catch (err) {
+      console.error('[email] Resend batch exception:', err);
+    }
+  }
+  return accepted;
 }

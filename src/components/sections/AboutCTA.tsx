@@ -12,7 +12,7 @@ const WHATSAPP_URL =
   encodeURIComponent(
     "Hi Aurexis, I'd like to talk about an AI project for my SME."
   );
-const CALENDLY_URL = "https://cal.com/aurexis/15min";
+const CALENDLY_URL = "https://cal.com/aurexis-solution/discoverycall";
 
 const GRAIN_DATA_URL = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.35 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")`;
 
@@ -151,7 +151,7 @@ export function AboutCTA() {
               className="group inline-flex items-center gap-2 rounded-full border border-[var(--color-electric-cyan)]/45 bg-[var(--color-electric-cyan)]/[0.04] px-5 py-3 text-[13.5px] font-medium text-white/95 backdrop-blur-md transition-all duration-300 hover:border-[var(--color-electric-cyan)]/70 hover:bg-[var(--color-electric-cyan)]/[0.08] md:px-6"
             >
               <Calendar className="h-[15px] w-[15px]" strokeWidth={1.8} />
-              Book a 15-min call
+              Book a discovery call
               <ArrowUpRight
                 className="h-[14px] w-[14px] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                 strokeWidth={2}

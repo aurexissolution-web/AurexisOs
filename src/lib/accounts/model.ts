@@ -309,6 +309,10 @@ export interface SyncPlan {
   addPayments: { invoice_document_id: string; receipt_id: string; amount: number; paid_on: string; reference: string }[];
   removeIncomeIds: string[];
   removePaymentIds: string[];
+  /** Income rows whose invoice was edited in Documents. */
+  updateIncomes: { id: string; patch: Pick<Income, 'income_date' | 'client_id' | 'client_name' | 'project' | 'description' | 'amount'> }[];
+  /** Payments whose receipt was edited in Documents. */
+  updatePayments: { id: string; patch: Pick<Payment, 'amount' | 'paid_on' | 'reference'> }[];
 }
 
 /**
@@ -322,11 +326,22 @@ export function planSync(docs: DocLite[], incomes: Income[], payments: Payment[]
   const paymentByReceipt = new Set(payments.filter((p) => p.receipt_id).map((p) => p.receipt_id as string));
   const paymentsByIncome = groupPayments(payments);
 
-  const plan: SyncPlan = { createIncomes: [], addPayments: [], removeIncomeIds: [], removePaymentIds: [] };
+  const plan: SyncPlan = { createIncomes: [], addPayments: [], removeIncomeIds: [], removePaymentIds: [], updateIncomes: [], updatePayments: [] };
 
   for (const inv of invoices) {
     if (inv.status === 'void' || Number(inv.total_myr) <= 0) continue;
-    if (incomeByDoc.has(inv.id)) continue;
+    const existing = incomeByDoc.get(inv.id);
+    if (existing) {
+      const patch = {
+        income_date: inv.doc_date, client_id: inv.client_id, client_name: inv.title, project: inv.project,
+        description: `Invoice ${inv.number}`, amount: Number(inv.total_myr),
+      };
+      if (
+        existing.income_date !== patch.income_date || existing.client_id !== patch.client_id || existing.client_name !== patch.client_name ||
+        existing.project !== patch.project || existing.description !== patch.description || Number(existing.amount) !== patch.amount
+      ) plan.updateIncomes.push({ id: existing.id, patch });
+      continue;
+    }
     plan.createIncomes.push({
       income_date: inv.doc_date,
       client_id: inv.client_id,
@@ -359,6 +374,15 @@ export function planSync(docs: DocLite[], incomes: Income[], payments: Payment[]
       paid_on: rec.doc_date,
       reference: rec.number,
     });
+  }
+
+  // A receipt edited in Documents carries its new amount, date and number to its payment.
+  const paymentByReceiptId = new Map(payments.filter((p) => p.receipt_id).map((p) => [p.receipt_id as string, p]));
+  for (const rec of docs.filter((d) => d.kind === 'receipt' && d.status !== 'void')) {
+    const p = paymentByReceiptId.get(rec.id);
+    if (!p || Number(rec.total_myr) <= 0) continue;
+    const patch = { amount: Number(rec.total_myr), paid_on: rec.doc_date, reference: rec.number };
+    if (Number(p.amount) !== patch.amount || p.paid_on !== patch.paid_on || p.reference !== patch.reference) plan.updatePayments.push({ id: p.id, patch });
   }
 
   // A receipt voided in Documents takes its payment back.

@@ -99,22 +99,77 @@ export const twoDigits = (n: number) => String(n).padStart(2, '0');
 
 // ── Starting template ────────────────────────────────────────────────────────
 
+/** Written into sections as {{client}} and filled from "Prepared for" when the PDF is built. */
+export const CLIENT_TOKEN = '{{client}}';
+
+export function fillClient(text: string, clientName: string): string {
+  return text.split(CLIENT_TOKEN).join(clientName.trim() || 'the client');
+}
+
 const LABELS: Record<ProductKey, string> = {
   presence: 'Presence', flow: 'Flow', core: 'Core', connect: 'Connect', audit: 'AI Readiness Audit',
 };
+/** What the product is, in words a client understands. */
+const SERVICES: Record<ProductKey, string> = {
+  presence: 'Website design and development',
+  flow: 'Workflow automation',
+  core: 'Custom business systems',
+  connect: 'WhatsApp and customer messaging',
+  audit: 'AI readiness audit',
+};
 const productLabel = (k: ProductKey) => LABELS[k] ?? 'Solution';
+const serviceName = (k: ProductKey) => SERVICES[k] ?? 'Solution';
 
 /** "RM1,850" or "RM925.50" (proposal style: no space). */
 const rm = (n: number) =>
   `RM${(Math.round(n * 100) / 100).toLocaleString('en-MY', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })}`;
 
-/** Standard sections filled with the client's name and a price. Everything is editable afterwards. */
-export function defaultSections(client: string, product: ProductKey, price: number): ProposalSection[] {
-  const c = client.trim() || 'the client';
+/** A price, or a visible blank to fill in when none is set yet. */
+const money = (n: number) => (n > 0 ? rm(n) : 'RM…');
+
+const CARE_PLAN: Record<ProductKey, string> = {
+  presence: `A website needs looking after once it is live. A monthly care plan keeps it secure, backed up and up to date. It is billed separately from the project price above.
+
+| Care plan | Monthly fee
+| Essential | RM350 per month
+| Growth | RM650 per month
+
+## What Essential includes
+- Hosting, SSL and domain management
+- Daily backups and security patches
+- Uptime monitoring and bug fixes
+- 1 hour of content edits each month
+
+~ Care plans are billed monthly, with a minimum of 6 months and month-to-month after that. Prices shown are for standard websites; database-driven projects are quoted separately. Choose a plan or decline it when accepting this proposal.`,
+  flow: careGeneric(),
+  core: careGeneric(),
+  connect: careGeneric(),
+  audit: careGeneric(),
+};
+
+function careGeneric(): string {
+  return `A monthly care plan keeps the solution running, secure and up to date after launch. It is billed separately from the project price above.
+
+| Care plan | Monthly fee
+| Monthly care plan | RM… per month
+
+## What the care plan includes
+- Hosting and monitoring
+- Fixes and updates
+- Support hours each month
+
+~ Choose a plan or decline it when accepting this proposal.`;
+}
+
+/** Standard sections. {{client}} is filled from "Prepared for" when the PDF is built. Everything is editable. */
+export function defaultSections(product: ProductKey, price: number): ProposalSection[] {
+  const c = CLIENT_TOKEN;
   const deposit = Math.round((price / 2) * 100) / 100;
   const balance = Math.round((price - deposit) * 100) / 100;
   const label = productLabel(product);
-  const sec = (title: string, body: string, pageBreak = true): ProposalSection => ({ title, body, pageBreak });
+  const service = serviceName(product);
+  // Short sections flow on after the previous one; long ones start a fresh page.
+  const sec = (title: string, body: string, pageBreak = false): ProposalSection => ({ title, body, pageBreak });
   return [
     sec(
       'About Aurexis Solution',
@@ -122,8 +177,8 @@ export function defaultSections(client: string, product: ProductKey, price: numb
 
 We combine business analysis, digital experience design, software development, workflow improvement, data engineering, systems integration, reporting and responsible AI to create practical technology solutions built around measurable business outcomes.
 
-## About Aurexis ${label}
-Describe the product in two or three sentences.
+## About this service
+Aurexis ${label} is our ${service.toLowerCase()} service. Add two or three sentences on what it will do for ${c}.
 
 ## Our approach
 - Understand the business objective before designing
@@ -193,10 +248,11 @@ The project timeline begins after:
 - Required content and visual assets are supplied
 - Domain access and any required account credentials are provided
 - One authorised representative is assigned`,
+      true,
     ),
     sec(
       'Project Investment',
-      `@invest ${c} — ${label} | ${rm(price)}
+      `@invest ${c} — ${service} | ${money(price)}
 
 The investment covers the design, development and launch of the project described in this proposal.
 
@@ -205,22 +261,25 @@ The investment covers the design, development and launch of the project describe
 - Deliverable
 
 ## Payment Schedule
-1. Project Commencement | 50% deposit — ${rm(deposit)}. Required to confirm the project and begin work.
-2. Before Launch | 50% balance — ${rm(balance)}. Payable after final approval and before go-live.
+1. Project Commencement | 50% deposit — ${money(deposit)}. Required to confirm the project and begin work.
+2. Before Launch | 50% balance — ${money(balance)}. Payable after final approval and before go-live.
 
 ## Commercial Notes
 - The deposit confirms acceptance of the project scope and reserves the delivery schedule.
 - Work begins after the deposit, required content, assets and access are received.
+- The project includes 2 rounds of revisions. Further rounds are quoted under Additional Services.
 - Additional work outside the approved scope will be quoted separately.
-- This proposal is valid for 14 days from the issue date.`,
+- This proposal is valid for 14 days from the issue date. Prices are held for that period only.`,
+      true,
     ),
+    sec('Care Plan and Maintenance', CARE_PLAN[product] ?? careGeneric()),
     sec(
       'Additional Services',
       `The following services are not included in the base project and may be added during the project or requested after launch.
 
 | Optional service | Investment
-| Additional page | RM0 per page
-| Additional revision round | RM0 per round
+| Additional page | RM… per page
+| Additional revision round | RM… per round
 
 ## Quoted Separately
 - Additional language versions
@@ -235,4 +294,24 @@ The investment covers the design, development and launch of the project describe
 @sign`,
     ),
   ];
+}
+
+// ── Checks before a proposal goes out ────────────────────────────────────────
+
+const LEFTOVERS: [RegExp, string][] = [
+  [/RM…|RM\s?0(\.0+)?(?![\d,])/, 'A price is still blank or RM0. Set the project price and the optional prices.'],
+  [/Add two or three sentences|Describe the result|One sentence that sums up|\(what the client needs and why\)/, 'Template wording is still in place (for example "Add two or three sentences").'],
+  [/^\s*[-•]\s*Point (one|two)\s*$|(First|Second|Third) objective|Key deliverable (one|two|three)|^\s*[-•]\s*Deliverable\s*$|^## Group (one|two)\s*$/im, 'Placeholder points remain (for example "Point one", "First objective", "Deliverable").'],
+  [/(requires|recommends|includes) \.\.\./, 'A sentence still ends in "..." and needs finishing.'],
+];
+
+/** Plain-language list of things to fix before sending; empty when the proposal looks finished. */
+export function proposalIssues(sections: ProposalSection[], clientName: string): string[] {
+  const text = sections.map((s) => s.body).join('\n');
+  const out: string[] = [];
+  for (const [re, msg] of LEFTOVERS) if (re.test(text)) out.push(msg);
+  if (/^@invest\s+the client\b/im.test(fillClient(text, clientName))) {
+    out.push('The Investment section says "the client" instead of the client name. Fill in "Prepared for".');
+  }
+  return out;
 }

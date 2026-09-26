@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Ban, FileDown, Receipt, Undo2 } from 'lucide-react';
+import { Ban, FileDown, Pencil, Receipt, Undo2 } from 'lucide-react';
 import { Button, useToast } from '@/components/admin/ui';
 import { setDocumentVoid } from '@/app/documents/(panel)/actions';
 
@@ -31,6 +31,14 @@ export function DocumentRowActions({ id, kind, isVoid }: { id: string; kind: str
       >
         <FileDown className="h-4 w-4" /> PDF
       </a>
+      {!isVoid && (
+        <Link
+          href={kind === 'proposal' ? `/documents/proposals/${id}/edit` : `/documents/billing/${id}/edit`}
+          className="inline-flex h-8 items-center gap-1.5 rounded-xl px-3 text-[12px] font-semibold text-white/70 hover:bg-white/[0.05] hover:text-white"
+        >
+          <Pencil className="h-4 w-4" /> Edit
+        </Link>
+      )}
       {kind === 'invoice' && !isVoid && (
         <Link
           href={`/documents/billing/new?kind=receipt&from=${id}`}

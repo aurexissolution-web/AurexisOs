@@ -45,7 +45,7 @@ const toPayload = (s: EditorState) => ({
   signature: true,
 });
 
-export function DocumentEditor({ initial, clients }: { initial: EditorState; clients: ClientOption[] }) {
+export function DocumentEditor({ initial, clients, docId }: { initial: EditorState; clients: ClientOption[]; docId?: string }) {
   const router = useRouter();
   const toast = useToast();
   const [s, setS] = useState<EditorState>(initial);
@@ -91,7 +91,7 @@ export function DocumentEditor({ initial, clients }: { initial: EditorState; cli
   const save = async () => {
     setSaving(true);
     const res = await saveDocument({
-      kind: s.kind, data: toPayload(s), clientId: s.clientId, sourceId: s.sourceId,
+      kind: s.kind, data: toPayload(s), clientId: s.clientId, sourceId: s.sourceId, id: docId,
     });
     setSaving(false);
     if (!res.ok) return toast('error', res.error);
@@ -286,7 +286,7 @@ export function DocumentEditor({ initial, clients }: { initial: EditorState; cli
         <div className="flex items-center gap-3">
           <Button variant="primary" onClick={save} disabled={saving || !!previewError}>
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            Save &amp; download PDF
+            {docId ? 'Save changes & download PDF' : 'Save & download PDF'}
           </Button>
           <Button variant="ghost" onClick={() => router.push('/documents/billing')}>
             Cancel

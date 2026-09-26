@@ -12,6 +12,7 @@ import {
   Inbox,
   LayoutDashboard,
   LogOut,
+  Mail,
   PenLine,
   Star,
   Users,
@@ -53,6 +54,14 @@ const NAV = [
     icon: CalendarDays,
     badge: null,
     group: 'Run',
+  },
+  {
+    href: '/admin/subscribers',
+    label: 'Subscribers',
+    short: 'Emails',
+    icon: Mail,
+    badge: null,
+    group: 'Publish',
   },
   {
     href: '/admin/insights',
@@ -232,7 +241,7 @@ export function AdminShell({
         {/* Tab bar (mobile) */}
         <nav
           aria-label="Admin"
-          className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-7 border-t border-white/[0.14] bg-[#05070C]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-8 border-t border-white/[0.14] bg-[#05070C]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
         >
           {NAV.map((item) => {
             const active = isActive(item.href);

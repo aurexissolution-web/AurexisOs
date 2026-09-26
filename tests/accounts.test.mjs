@@ -82,6 +82,19 @@ test('sync is idempotent and handles voids', () => {
   assert.deepEqual(planSync([doc({}), doc({ id: 'r1', kind: 'receipt', status: 'void', source_id: 'd1' })], incomes, payments).removePaymentIds, ['p1']);
 });
 
+test('sync: editing an invoice or receipt in Documents updates its income and payment', () => {
+  const incomes = [inc({ id: 'i1', document_id: 'd1', amount: 550, client_name: 'MEDSS', income_date: '2026-09-10', description: 'Invoice AS-011', project: 'Company Profile' })];
+  const payments = [pay({ id: 'p1', income_id: 'i1', receipt_id: 'r1', amount: 275, paid_on: '2026-09-12', reference: 'REC-011' })];
+  const rec = (o) => doc({ id: 'r1', kind: 'receipt', number: 'REC-011', total_myr: 275, doc_date: '2026-09-12', source_id: 'd1', project: '', ...o });
+  const same = planSync([doc({}), rec({})], incomes, payments);
+  assert.deepEqual([same.updateIncomes.length, same.updatePayments.length], [0, 0]);
+
+  const edited = planSync([doc({ total_myr: 700, title: 'MEDSS Training', doc_date: '2026-09-11', number: 'AS-011A' }), rec({ total_myr: 300, doc_date: '2026-09-15' })], incomes, payments);
+  assert.deepEqual(edited.updateIncomes, [{ id: 'i1', patch: { income_date: '2026-09-11', client_id: null, client_name: 'MEDSS Training', project: 'Company Profile', description: 'Invoice AS-011A', amount: 700 } }]);
+  assert.deepEqual(edited.updatePayments, [{ id: 'p1', patch: { amount: 300, paid_on: '2026-09-15', reference: 'REC-011' } }]);
+  assert.equal(planSync([doc({ total_myr: 700 }), rec({})], edited.updateIncomes.length ? [{ ...incomes[0], amount: 700 }] : incomes, payments).updateIncomes.length, 0);
+});
+
 test('csv escapes commas and quotes and defuses formulas', () => {
   assert.equal(toCsv([['a,b', 'say "hi"', 5]]), '"a,b","say ""hi""",5');
   assert.equal(toCsv([['=SUM(A1)', '-5']]), "'=SUM(A1),-5");

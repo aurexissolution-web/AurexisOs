@@ -176,6 +176,7 @@ export function CapacityCalculator() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const website = new FormData(e.currentTarget as HTMLFormElement).get("website");
     if (!EMAIL_REGEX.test(email)) {
       setEmailError("Enter a valid email address.");
       return;
@@ -186,7 +187,7 @@ export function CapacityCalculator() {
       const res = await fetch("/api/calculator-leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, staff: people, wage: salary, hours }),
+        body: JSON.stringify({ email, staff: people, wage: salary, hours, website }),
       });
       const data = await res.json();
       if (data.success) setSent(true);
@@ -414,7 +415,8 @@ export function CapacityCalculator() {
           {sent ? (
             <p className="text-[13.5px] text-white/60">Sent — check your inbox for the breakdown.</p>
           ) : (
-            <form onSubmit={onSubmit} noValidate className="min-w-0 flex-1">
+            <form onSubmit={onSubmit} noValidate className="relative min-w-0 flex-1">
+              <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
               <label htmlFor="cap-email" className="block text-[13px] text-white/45">
                 Or email me the breakdown <span className="text-white/25">(optional)</span>
               </label>

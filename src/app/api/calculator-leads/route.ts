@@ -4,17 +4,26 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { sendEmail, SITE_URL, TEAM_INBOX } from "@/lib/email/send";
 import { linkEnquiry, logEmailSent } from "@/lib/admin/client-link";
 import { calculatorReport, teamLeadAlert } from "@/lib/email/templates";
+import { clientIp, isHoneypot, rateLimited } from "@/lib/spam";
 
 const GOOGLE_SHEETS_WEBHOOK_URL = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: NextRequest) {
   try {
+    if (rateLimited(`calc:${clientIp(request)}`, 5, 60 * 60_000)) {
+      return NextResponse.json({ success: false, error: "Too many requests. Please try again later." }, { status: 429 });
+    }
     const body = await request.json();
+    if (isHoneypot(body)) return NextResponse.json({ success: true });
     const { email, staff, wage, hours } = body;
 
     if (typeof email !== "string" || !EMAIL_REGEX.test(email)) {
       return NextResponse.json({ success: false, error: "Invalid email" }, { status: 400 });
+    }
+
+    if (email.length > 160 || rateLimited(`calc-email:${email.toLowerCase()}`, 2, 60 * 60_000)) {
+      return NextResponse.json({ success: true });
     }
 
     const staffNum = Number(staff);

@@ -5,7 +5,7 @@
 import path from 'node:path';
 import { Document, Image, Page, Path, Svg, Text, View } from '@react-pdf/renderer';
 import { PRODUCTS, formatMonthYear } from '../model';
-import { parseBody, twoDigits, type Block, type ProposalData } from '../proposal';
+import { fillClient, parseBody, twoDigits, type Block, type ProposalData } from '../proposal';
 
 const W = 595.5;
 const H = 842.25;
@@ -47,22 +47,57 @@ function Furniture({ data }: { data: ProposalData }) {
   );
 }
 
+/** Sections grouped so that every section marked "start on a new page" begins a run. */
+function pageRuns(sections: ProposalData['sections']): ProposalData['sections'][] {
+  const runs: ProposalData['sections'][] = [];
+  sections.forEach((s, i) => {
+    if (i === 0 || s.pageBreak || !runs.length) runs.push([s]);
+    else runs[runs.length - 1].push(s);
+  });
+  return runs;
+}
+
 const Heading = ({ text }: { text: string }) => (
   <Text minPresenceAhead={80} style={{ fontFamily: 'Cormorant', fontWeight: 700, fontSize: 30, color: TEAL, marginBottom: 12, lineHeight: 1.15 }}>
     {text}
   </Text>
 );
 
-function Blocks({ blocks, client, signature }: { blocks: Block[]; client: string; signature: boolean }) {
-  return (
-    <>
-      {blocks.map((b, i) => {
-        switch (b.t) {
+/** Short enough to keep on the same page as the heading above it. */
+const small = (b: Block) =>
+  b.t === 'para' || b.t === 'callout' || b.t === 'note' || b.t === 'num' || b.t === 'invest' ||
+  (b.t === 'bullets' && b.items.length <= 8) || (b.t === 'table' && b.rows.length <= 10);
+
+/** Headings never sit alone at the bottom of a page: each travels with what follows it. */
+function Blocks({ blocks, client, signature, title }: { blocks: Block[]; client: string; signature: boolean; title?: string }) {
+  const items = blocks.map((b, i) => renderBlock(b, i, client, signature));
+  const groups: React.ReactNode[] = [];
+  let pendingTitle = title;
+  for (let i = 0; i < blocks.length; ) {
+    const els: React.ReactNode[] = [];
+    if (pendingTitle !== undefined) els.push(<Heading key="h" text={pendingTitle} />);
+    if (blocks[i].t === 'sub') {
+      els.push(items[i++]);
+      if (i < blocks.length && small(blocks[i])) els.push(items[i++]);
+    } else if (pendingTitle !== undefined && small(blocks[i])) {
+      els.push(items[i++]);
+    } else if (pendingTitle === undefined) {
+      els.push(items[i++]);
+    }
+    pendingTitle = undefined;
+    groups.push(els.length > 1 ? <View key={i} wrap={false}>{els}</View> : els[0]);
+  }
+  if (!blocks.length && pendingTitle !== undefined) groups.push(<Heading key="h" text={pendingTitle} />);
+  return <>{groups}</>;
+}
+
+function renderBlock(b: Block, i: number, client: string, signature: boolean): React.ReactNode {
+  switch (b.t) {
           case 'para':
             return <Text key={i} style={{ ...body, marginBottom: 9 }}>{b.text}</Text>;
           case 'sub':
             return (
-              <Text key={i} minPresenceAhead={60} style={{ fontFamily: 'Cormorant', fontWeight: 700, fontSize: 21, color: TEAL, marginTop: 10, marginBottom: 6 }}>
+              <Text key={i} minPresenceAhead={130} style={{ fontFamily: 'Cormorant', fontWeight: 700, fontSize: 21, color: TEAL, marginTop: 10, marginBottom: 6 }}>
                 {b.text}
               </Text>
             );
@@ -143,10 +178,7 @@ function Blocks({ blocks, client, signature }: { blocks: Block[]; client: string
                 ))}
               </View>
             );
-        }
-      })}
-    </>
-  );
+  }
 }
 
 export function ProposalDocument({ data }: { data: ProposalData }) {
@@ -176,16 +208,19 @@ export function ProposalDocument({ data }: { data: ProposalData }) {
         <Furniture data={data} />
       </Page>
 
-      <Page size={{ width: W, height: H }} style={{ backgroundColor: BG, paddingTop: 112, paddingBottom: 150, paddingHorizontal: 56 }}>
-        <Image fixed src={asset('logo-white.png')} style={{ position: 'absolute', left: 52, top: 30, width: 96, height: 54 }} />
-        {data.sections.map((s, i) => (
-          <View key={i} break={i > 0 && s.pageBreak} style={{ marginBottom: 14 }}>
-            <Heading text={s.title} />
-            <Blocks blocks={parseBody(s.body)} client={data.clientName} signature={data.signature} />
-          </View>
-        ))}
-        <Furniture data={data} />
-      </Page>
+      {/* One <Page> per run of sections: a forced break starts a real new page, so a section
+          that ends exactly at the bottom of a page can never leave a blank one behind. */}
+      {pageRuns(data.sections).map((run, n) => (
+        <Page key={n} size={{ width: W, height: H }} style={{ backgroundColor: BG, paddingTop: 112, paddingBottom: 150, paddingHorizontal: 56 }}>
+          <Image fixed src={asset('logo-white.png')} style={{ position: 'absolute', left: 52, top: 30, width: 96, height: 54 }} />
+          {run.map((s, i) => (
+            <View key={i} style={{ marginBottom: 14 }}>
+              <Blocks title={s.title} blocks={parseBody(fillClient(s.body, data.clientName))} client={data.clientName} signature={data.signature} />
+            </View>
+          ))}
+          <Furniture data={data} />
+        </Page>
+      ))}
     </Document>
   );
 }

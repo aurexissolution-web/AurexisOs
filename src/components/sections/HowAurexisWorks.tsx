@@ -94,8 +94,8 @@ function StepVisual({ step }: { step: Step }) {
         <Image
           src={step.image}
           alt={step.heading}
-          width={1856}
-          height={2304}
+          width={1300}
+          height={1614}
           loading="lazy"
           onLoad={() => setLoaded(true)}
           onError={() => setFailed(true)}

@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowDown, ArrowUp, Download, HelpCircle, Loader2, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { AlertTriangle, ArrowDown, ArrowUp, Download, HelpCircle, Loader2, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { Button, Card, Input, Label, Segmented, Textarea, useToast } from '@/components/admin/ui';
 import { saveDocument } from '@/app/documents/(panel)/actions';
 import { PRODUCTS, proposalRef, suggestClientCode, type ProductKey } from '@/lib/documents/model';
-import { defaultSections, type ProposalSection } from '@/lib/documents/proposal';
+import { defaultSections, proposalIssues, type ProposalSection } from '@/lib/documents/proposal';
 import { PdfPreview } from './PdfPreview';
 import type { ClientOption } from './DocumentEditor';
 
@@ -39,13 +39,13 @@ const SYNTAX = `## Sub-heading
 @sign                          (acceptance and signatures)
 A blank line starts a new paragraph.`;
 
-export function ProposalEditor({ initial, clients, existingRefs, year }: { initial: ProposalState; clients: ClientOption[]; existingRefs: string[]; year: number }) {
+export function ProposalEditor({ initial, clients, existingRefs, year, docId }: { initial: ProposalState; clients: ClientOption[]; existingRefs: string[]; year: number; docId?: string }) {
   const router = useRouter();
   const toast = useToast();
   const [s, setS] = useState<ProposalState>(initial);
   const [saving, setSaving] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
-  const [refEdited, setRefEdited] = useState(false);
+  const [refEdited, setRefEdited] = useState(Boolean(docId));
   const [showHelp, setShowHelp] = useState(false);
 
   const nextRef = (product: ProductKey, client: string) => {
@@ -81,7 +81,7 @@ export function ProposalEditor({ initial, clients, existingRefs, year }: { initi
 
   const reset = () => {
     if (!window.confirm('Replace every section with a fresh template for this client? Your edits will be lost.')) return;
-    patch({ sections: defaultSections(s.clientName, s.product, s.price), title: TITLES[s.product] });
+    patch({ sections: defaultSections(s.product, s.price), title: TITLES[s.product] });
   };
 
   const payload = useMemo(
@@ -89,9 +89,12 @@ export function ProposalEditor({ initial, clients, existingRefs, year }: { initi
     [s],
   );
 
+  const issues = useMemo(() => proposalIssues(s.sections, s.clientName), [s.sections, s.clientName]);
+
   const save = async () => {
+    if (issues.length && !window.confirm(`This proposal still needs attention:\n\n${issues.map((m) => `• ${m}`).join('\n')}\n\nSave and download it anyway?`)) return;
     setSaving(true);
-    const res = await saveDocument({ kind: 'proposal', data: JSON.parse(payload).data, clientId: s.clientId, sourceId: null });
+    const res = await saveDocument({ kind: 'proposal', data: JSON.parse(payload).data, clientId: s.clientId, sourceId: null, id: docId });
     setSaving(false);
     if (!res.ok) return toast('error', res.error);
     toast('ok', 'Saved. Opening the PDF.');
@@ -104,7 +107,7 @@ export function ProposalEditor({ initial, clients, existingRefs, year }: { initi
       <div className="space-y-5">
         <Card className="space-y-4 p-5">
           <div>
-            <Label hint="pick an existing client, or type a new name">Prepared for</Label>
+            <Label hint="{{client}} in the text becomes this name">Prepared for</Label>
             <Input list="prop-clients" value={s.clientName} onChange={(e) => pickClient(e.target.value)} placeholder="Company name" />
             <datalist id="prop-clients">
               {clients.map((c) => (
@@ -136,7 +139,7 @@ export function ProposalEditor({ initial, clients, existingRefs, year }: { initi
           </div>
           <div className="flex flex-wrap items-end gap-3 border-t border-white/[0.1] pt-4">
             <div className="w-40">
-              <Label hint="RM">Project price</Label>
+              <Label hint="RM, then fill from template">Project price</Label>
               <Input type="number" min={0} step="0.01" value={s.price} onChange={(e) => patch({ price: Number(e.target.value) })} />
             </div>
             <Button onClick={reset}>
@@ -172,10 +175,17 @@ export function ProposalEditor({ initial, clients, existingRefs, year }: { initi
           <Plus className="h-4 w-4" /> Add section
         </Button>
 
+        {issues.length > 0 && (
+          <div role="status" className="rounded-xl border border-amber-300/25 bg-amber-300/[0.06] p-4 text-[12.5px] leading-[1.6] text-amber-100/90">
+            <p className="flex items-center gap-2 font-semibold text-amber-200"><AlertTriangle className="h-4 w-4" /> Before you send this</p>
+            <ul className="mt-2 list-disc space-y-1 pl-5">{issues.map((m) => <li key={m}>{m}</li>)}</ul>
+          </div>
+        )}
+
         <div className="flex items-center gap-3 pt-2">
           <Button variant="primary" onClick={save} disabled={saving || !!previewError}>
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            Save &amp; download PDF
+            {docId ? 'Save changes & download PDF' : 'Save & download PDF'}
           </Button>
           <Button variant="ghost" onClick={() => router.push('/documents/proposals')}>Cancel</Button>
         </div>

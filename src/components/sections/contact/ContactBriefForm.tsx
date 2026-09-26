@@ -49,6 +49,7 @@ export function ContactBriefForm() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    const website = new FormData(e.currentTarget as HTMLFormElement).get('website');
     setState('sending');
     setErrors({});
     setTopError(null);
@@ -56,7 +57,7 @@ export function ContactBriefForm() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ intent, name, email, phone, company, stage, message }),
+        body: JSON.stringify({ intent, name, email, phone, company, stage, message, website }),
       });
       if (res.ok) {
         setState('sent');
@@ -133,7 +134,8 @@ export function ContactBriefForm() {
   }
 
   return (
-    <form className="flex flex-col" style={{ gap: 18 }} onSubmit={handleSubmit} noValidate>
+    <form className="relative flex flex-col" style={{ gap: 18 }} onSubmit={handleSubmit} noValidate>
+      <input name="website" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
 
       {topError && (
         <p

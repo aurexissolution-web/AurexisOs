@@ -131,7 +131,7 @@ test('receipt validation needs at least one paid line', () => {
   assert.equal(r.data.items[0].paid, true);
 });
 
-import { parseBody, defaultSections } from '../src/lib/documents/proposal.ts';
+import { parseBody, defaultSections, fillClient, proposalIssues } from '../src/lib/documents/proposal.ts';
 
 test('proposal syntax turns lines into blocks', () => {
   const b = parseBody('Hello there\nsecond line\n\n## Head\n- one\n- two\n1. Title | body text\n> quote\n| A | B\n| 1 | 2\n~ tiny\n@invest Site | RM1,850\n@sign');
@@ -144,13 +144,54 @@ test('proposal syntax turns lines into blocks', () => {
   assert.equal(b[7].amount, 'RM1,850');
 });
 
-test('default proposal carries the client name and an exact payment split', () => {
-  const s = defaultSections('Acme Sdn Bhd', 'presence', 1851);
+test('default proposal uses the client token, a plain service heading and an exact payment split', () => {
+  const s = defaultSections('presence', 1851);
   const inv = s.find((x) => x.title === 'Project Investment').body;
-  assert.match(inv, /@invest Acme Sdn Bhd — Presence \| RM1,851/);
+  assert.match(inv, /@invest \{\{client\}\} — Website design and development \| RM1,851/);
   assert.match(inv, /RM925\.50/);
-  assert.match(inv, /RM925\.50/);
-  assert.ok(s.some((x) => x.body.includes('Acme Sdn Bhd')));
+  assert.ok(s.some((x) => x.body.includes('{{client}}')));
+  const about = s[0].body;
+  assert.match(about, /## About this service/);
+  assert.ok(!about.includes('About Aurexis Presence'));
+});
+
+test('client token is filled from "Prepared for", with a fallback', () => {
+  assert.equal(fillClient('For {{client}}: {{client}}', ' Sic F&B Sdn Bhd '), 'For Sic F&B Sdn Bhd: Sic F&B Sdn Bhd');
+  assert.equal(fillClient('For {{client}}', ''), 'For the client');
+});
+
+test('template covers care plan, revision rounds and validity', () => {
+  const s = defaultSections('presence', 1851);
+  const care = s.find((x) => /care plan/i.test(x.title));
+  assert.ok(care, 'care plan section');
+  assert.match(care.body, /RM350 per month/);
+  assert.match(care.body, /RM650 per month/);
+  const inv = s.find((x) => x.title === 'Project Investment').body;
+  assert.match(inv, /valid for 14 days/);
+  assert.match(inv, /2 rounds of revisions/);
+  assert.equal(s.findIndex((x) => x === care), s.findIndex((x) => x.title === 'Project Investment') + 1);
+});
+
+test('a price of 0 shows a blank to fill in instead of RM0', () => {
+  const s = defaultSections('presence', 0);
+  const all = s.map((x) => x.body).join('\n');
+  assert.ok(!/RM0(?![\d,])/.test(all.replace(/RM0\.\d/g, '')), 'no RM0');
+  assert.match(s.find((x) => x.title === 'Project Investment').body, /RM…/);
+});
+
+test('unfinished template text is reported before a proposal goes out', () => {
+  const fresh = proposalIssues(defaultSections('presence', 0), 'Acme');
+  assert.ok(fresh.some((m) => /price/i.test(m)), 'price blank');
+  assert.ok(fresh.some((m) => /placeholder|template/i.test(m)), 'template wording');
+  const done = [
+    { title: 'Project Investment', body: '@invest Acme — Website | RM3,250\n\nDeposit RM1,625.', pageBreak: true },
+    { title: 'Summary', body: 'Acme needs a website that wins enquiries.', pageBreak: true },
+  ];
+  assert.deepEqual(proposalIssues(done, 'Acme'), []);
+  assert.ok(proposalIssues([{ title: 'X', body: '@invest the client — Site | RM100', pageBreak: true }], 'Acme').some((m) => /client name/i.test(m)));
+  const tokened = [{ title: 'X', body: '@invest {{client}} — Site | RM100', pageBreak: true }];
+  assert.deepEqual(proposalIssues(tokened, 'Sic F&B Sdn Bhd'), []);
+  assert.ok(proposalIssues(tokened, '').some((m) => /client name/i.test(m)));
 });
 
 import { summarize, daysBetween } from '../src/lib/documents/stats.ts';

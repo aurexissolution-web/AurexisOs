@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ChatbotWidget } from "@/components/ui/ChatbotWidget";
+import { LeadPopup } from "@/components/ui/LeadPopup";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -80,6 +81,7 @@ export default function RootLayout({
           <div id="main">{children}</div>
         </SmoothScrollProvider>
         <ChatbotWidget />
+        <LeadPopup />
       </body>
     </html>
   );

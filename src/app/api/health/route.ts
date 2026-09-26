@@ -3,32 +3,20 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
+// Keeps the free-tier database awake (pinged on a schedule). Public, so it uses
+// the anon key and never returns error details.
 export async function GET() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) {
+    return NextResponse.json({ status: "error" }, { status: 500 });
+  }
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-    if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.json({ error: "Missing environment variables" }, { status: 500 });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Run a lightweight query to wake up/keep the database active
-    const { error } = await supabase.from("tickets").select("id").limit(1);
-
-    if (error) {
-      throw error;
-    }
-
-    return NextResponse.json({ 
-      status: "ok", 
-      message: "Database pinged successfully", 
-      timestamp: new Date().toISOString() 
-    });
-  } catch (error) {
-    console.error("Health check failed:", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ status: "error", message }, { status: 500 });
+    const { error } = await createClient(supabaseUrl, supabaseKey).from("tickets").select("id").limit(1);
+    if (error) console.error("Health check query failed:", error.message);
+    return NextResponse.json({ status: error ? "error" : "ok", timestamp: new Date().toISOString() }, { status: error ? 500 : 200 });
+  } catch (err) {
+    console.error("Health check failed:", err);
+    return NextResponse.json({ status: "error" }, { status: 500 });
   }
 }

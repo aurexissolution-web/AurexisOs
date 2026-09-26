@@ -6,7 +6,6 @@ import {
   ChevronDown,
   Download,
   Layers,
-  Paperclip,
   SendHorizontal,
 } from "lucide-react";
 import { Linkify } from "./linkify";
@@ -114,20 +113,6 @@ function SolutionPicker({ solutions }: { solutions: HeroChatSolution[] }) {
   );
 }
 
-function AttachButton() {
-  return (
-    <button
-      type="button"
-      disabled
-      title="Attach files — coming soon"
-      aria-label="Attach files (coming soon)"
-      className="flex size-8 items-center justify-center rounded-full text-[#5a5a5f] transition-colors disabled:cursor-not-allowed"
-    >
-      <Paperclip className="size-4" strokeWidth={1.5} />
-    </button>
-  );
-}
-
 function DownloadPdfButton() {
   return (
     <a
@@ -205,7 +190,6 @@ const ChatInput = React.forwardRef<
       <div className="flex items-center justify-between px-3 pb-3 pt-1">
         <div className="flex items-center gap-1">
           <SolutionPicker solutions={solutions} />
-          <AttachButton />
         </div>
         <div className="flex items-center gap-2">
           <DownloadPdfButton />

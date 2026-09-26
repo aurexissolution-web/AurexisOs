@@ -3,7 +3,7 @@
 // the save action so they can never disagree.
 import 'server-only';
 import { amountPaid, totals } from './model';
-import { parseBody, type ProposalData } from './proposal';
+import { fillClient, parseBody, type ProposalData } from './proposal';
 import { checkInvoice, checkProposal, checkReceipt } from './validate';
 import { renderInvoicePdf, renderProposalPdf, renderReceiptPdf } from './render';
 
@@ -23,7 +23,7 @@ export interface Built {
 /** First "RM1,850" style amount found in a proposal's @invest line. */
 export function proposalTotal(p: ProposalData): number {
   for (const s of p.sections) {
-    for (const b of parseBody(s.body)) {
+    for (const b of parseBody(fillClient(s.body, p.clientName))) {
       if (b.t === 'invest') {
         const n = Number(b.amount.replace(/[^\d.]/g, ''));
         if (Number.isFinite(n)) return n;

@@ -102,7 +102,7 @@ export const FAQ_ITEMS: ReadonlyArray<FAQ> = [
 
 export const HERO_COPY = {
   eyebrow: 'Contact · Studio open today',
-  titleLines: ['Three founders.', 'Two studios.'],
+  titleLines: ['Two founders.', 'Two studios.'],
   titleClose: { plain: 'One', italic: 'call', stroke: 'away' },
   lede: 'A real engineer reads every message and replies within a working day. Briefs, RFPs, "is this even possible" questions — bring all of it. We work with founders building products that need to actually ship.',
 };

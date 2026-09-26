@@ -73,6 +73,8 @@ type Layout = {
   blocks: Block[];
   cta?: { label: string; href: string };
   footer?: string;
+  /** Plain-text footer, for when `footer` holds links that would be stripped. */
+  textFooter?: string;
 };
 
 const FONT = `-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif`;
@@ -174,7 +176,9 @@ function render(l: Layout): Email {
         : [];
     }),
     ...(l.cta ? [`${l.cta.label}: ${l.cta.href}`, ''] : []),
-    l.footer
+    l.textFooter
+      ? l.textFooter
+      : l.footer
       ? unesc(l.footer.replace(/<[^>]+>/g, ''))
       : `Need us sooner? WhatsApp ${WHATSAPP_DISPLAY} or just reply to this email.`,
     '',
@@ -402,5 +406,85 @@ export function clientFileEmail(o: {
       { kind: 'p', text: 'Reply to this email if anything needs changing, and it comes straight to us.' },
     ],
     footer: `${esc(o.senderName)}, Aurexis Solution · <a href="${WHATSAPP_LINK}" style="color:#5EE3DA;text-decoration:none;">WhatsApp ${WHATSAPP_DISPLAY}</a>`,
+  });
+}
+
+// ── Follow-up series and newsletters ─────────────────────────────────────────
+
+const BOOKING_LINK = 'https://cal.com/aurexis-solution/discoverycall';
+
+function unsubscribeFooter(unsubUrl: string) {
+  const accent = '#5EE3DA';
+  return {
+    footer: `Questions? Just reply to this email, or WhatsApp <a href="${WHATSAPP_LINK}" style="color:${accent};text-decoration:none;">${WHATSAPP_DISPLAY}</a>.<br>You are getting this because you left your details on ${SITE}. <a href="${esc(unsubUrl)}" style="color:rgba(255,255,255,0.6);">Unsubscribe</a>.`,
+    textFooter: `Questions? Just reply to this email, or WhatsApp ${WHATSAPP_DISPLAY}.\nYou are getting this because you left your details on ${SITE}. Unsubscribe: ${unsubUrl}`,
+  };
+}
+
+/** Step 0 is the welcome email; steps 1 to 3 follow on days 3, 7 and 14. */
+export function dripEmail(step: number, o: { name: string; unsubUrl: string }): Email {
+  const first = o.name.trim().split(/\s+/)[0];
+  const hi = first ? `Hi ${first},` : 'Hi there,';
+  const site = `https://${SITE}`;
+  const foot = unsubscribeFooter(o.unsubUrl);
+  const steps: Layout[] = [
+    {
+      subject: 'Welcome to Aurexis',
+      preheader: 'A few short, practical emails. No spam.',
+      eyebrow: 'Welcome',
+      heading: first ? `You're in, ${first}.` : "You're in.",
+      blocks: [
+        { kind: 'p', text: `${hi}\n\nThanks for leaving your details. Over the next two weeks we will send a few short emails on where small businesses lose time, and what to do about it. No spam and no hard sell.` },
+        { kind: 'p', text: 'If something is on your mind right now, such as a slow process, a messy spreadsheet or a WhatsApp inbox nobody can keep up with, just reply to this email. A real person reads it.' },
+      ],
+      cta: { label: 'Book a free discovery call', href: BOOKING_LINK },
+    },
+    {
+      subject: 'Where does your week actually go?',
+      preheader: 'The repetitive work nobody put on the plan.',
+      eyebrow: 'Aurexis · Tip 1',
+      heading: 'The work nobody put on the plan.',
+      blocks: [
+        { kind: 'p', text: `${hi}\n\nMost business owners we talk to lose hours every week to the same few things: typing the same details into two places, chasing approvals over WhatsApp, and rebuilding the same report by hand.` },
+        { kind: 'p', text: 'None of it is hard. It is just repetitive, and repetitive work is exactly what software is good at.' },
+        { kind: 'p', text: 'Try this: pick one task you did three times this week. That is usually the best place to start.' },
+      ],
+      cta: { label: 'See how an AI Readiness Audit works', href: `${site}/solutions/ai-readiness-audit` },
+    },
+    {
+      subject: 'What an AI Readiness Audit tells you',
+      preheader: 'A plain-language plan, not a sales pitch.',
+      eyebrow: 'Aurexis · Tip 2',
+      heading: 'Know what to fix first.',
+      blocks: [
+        { kind: 'p', text: `${hi}\n\nAn AI Readiness Audit is a structured look at how your business runs today: the tools, the handoffs and the manual steps in between.` },
+        { kind: 'p', text: 'You get a plain-language view of which parts are worth automating first, and which are not. It is a starting point, so you decide what to do with it.' },
+      ],
+      cta: { label: 'Read about the audit', href: `${site}/solutions/ai-readiness-audit` },
+    },
+    {
+      subject: 'Still on your mind?',
+      preheader: 'The last email in this series.',
+      eyebrow: 'Aurexis · Last one',
+      heading: 'Want to talk it through?',
+      blocks: [
+        { kind: 'p', text: `${hi}\n\nThis is the last email in this series. If any of it sounded familiar, a free call is the quickest way to find out what would help in your business.` },
+        { kind: 'p', text: 'No pitch and no pressure. Bring one problem, and we will tell you honestly what we would do about it.' },
+      ],
+      cta: { label: 'Book a free discovery call', href: BOOKING_LINK },
+    },
+  ];
+  return render({ ...(steps[step] ?? steps[0]), ...foot });
+}
+
+/** A newsletter written in the admin panel; `paragraphs` are plain text. */
+export function broadcastEmail(o: { subject: string; paragraphs: string[]; unsubUrl: string }): Email {
+  return render({
+    subject: o.subject,
+    preheader: (o.paragraphs[0] ?? '').slice(0, 110),
+    eyebrow: 'Aurexis',
+    heading: o.subject,
+    blocks: o.paragraphs.map((text) => ({ kind: 'p' as const, text })),
+    ...unsubscribeFooter(o.unsubUrl),
   });
 }

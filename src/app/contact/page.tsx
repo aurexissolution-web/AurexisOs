@@ -10,7 +10,7 @@ import { ContactFAQ } from '@/components/sections/contact/ContactFAQ';
 export const metadata = {
   title: 'Contact Aurexis Solution | Free 45-Min Call, Kuala Lumpur',
   description:
-    'Three founders, two studios, one call away. Book a free 45-minute strategy session: we audit your stack, find the bottlenecks and hand you a roadmap.',
+    'Two founders, two studios, one call away. Book a free 45-minute strategy session: we audit your stack, find the bottlenecks and hand you a roadmap.',
 };
 
 export default function ContactPage() {

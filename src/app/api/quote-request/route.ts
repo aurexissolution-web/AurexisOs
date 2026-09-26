@@ -5,6 +5,8 @@
 import { after, NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { isValidEmail, isValidMalaysianPhone } from '@/lib/lead-validation';
+import { clientIp, isHoneypot, rateLimited } from '@/lib/spam';
+import { telegramBody } from '@/lib/telegram';
 import { sendEmail, SITE_URL, TEAM_INBOX } from '@/lib/email/send';
 import { linkEnquiry, logEmailSent } from '@/lib/admin/client-link';
 import {
@@ -64,23 +66,9 @@ export const runtime = 'nodejs';
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
-// In-memory, per-instance — resets on cold start / redeploy and isn't shared
-// across serverless instances. Good enough to blunt casual abuse; not a hard
-// guarantee under multi-instance load. Shared across every service on this route.
-const rateMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 3;
 const RATE_WINDOW_MS = 60 * 60 * 1000;
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return false;
-  }
-  entry.count++;
-  return entry.count > RATE_LIMIT;
-}
+const MAX_TEXT = 4000;
 
 async function notifyTelegram(text: string) {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
@@ -88,7 +76,7 @@ async function notifyTelegram(text: string) {
     const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: 'Markdown' }),
+      body: telegramBody(TELEGRAM_CHAT_ID, text),
     });
     if (!res.ok) {
       console.error('[/api/quote-request] telegram non-ok:', await res.text());
@@ -869,8 +857,8 @@ async function handleAuditQuote(
 }
 
 export async function POST(request: NextRequest) {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-  if (isRateLimited(ip)) {
+  const ip = clientIp(request);
+  if (rateLimited(`quote:${ip}`, RATE_LIMIT, RATE_WINDOW_MS)) {
     return NextResponse.json(
       { error: 'Too many requests. Please wait a while and try again, or WhatsApp us directly.' },
       { status: 429 },
@@ -878,7 +866,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = (await request.json()) as Record<string, unknown>;
+    const raw = (await request.json()) as Record<string, unknown>;
+    if (isHoneypot(raw)) return NextResponse.json({ ok: true });
+    const body = Object.fromEntries(
+      Object.entries(raw).map(([k, v]) => [k, typeof v === 'string' ? v.slice(0, MAX_TEXT) : v]),
+    );
+    if (typeof body.email === 'string' && rateLimited(`quote-email:${body.email.trim().toLowerCase()}`, RATE_LIMIT, RATE_WINDOW_MS)) {
+      return NextResponse.json({ ok: true });
+    }
     const userAgent = request.headers.get('user-agent') || null;
     const service = typeof body.service === 'string' ? body.service : 'presence';
 

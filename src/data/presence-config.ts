@@ -398,5 +398,5 @@ export const PRESENCE_HERO_SHOWCASE: {
 } = {
   client: 'Ayurveda Wellness Centre',
   url: 'www.ayurvedicwellnesscenter.com.my',
-  imageSrc: '/images/presence/showcase.png',
+  imageSrc: '/images/presence/showcase.webp',
 };

@@ -120,7 +120,19 @@ export async function syncFromDocuments(): Promise<void> {
 
   const { incomes, payments } = await loadIncome();
   const plan = planSync(docs, incomes, payments);
-  if (!plan.createIncomes.length && !plan.addPayments.length && !plan.removeIncomeIds.length && !plan.removePaymentIds.length) return;
+  if (
+    !plan.createIncomes.length && !plan.addPayments.length && !plan.removeIncomeIds.length && !plan.removePaymentIds.length &&
+    !plan.updateIncomes.length && !plan.updatePayments.length
+  ) return;
+
+  for (const u of plan.updateIncomes) {
+    const { error } = await supabaseAdmin.from('account_income').update(u.patch).eq('id', u.id);
+    if (error) console.error('[accounts] income update failed:', error.message);
+  }
+  for (const u of plan.updatePayments) {
+    const { error } = await supabaseAdmin.from('account_payments').update(u.patch).eq('id', u.id);
+    if (error) console.error('[accounts] payment update failed:', error.message);
+  }
 
   if (plan.removePaymentIds.length) await supabaseAdmin.from('account_payments').delete().in('id', plan.removePaymentIds);
   if (plan.removeIncomeIds.length) await supabaseAdmin.from('account_income').delete().in('id', plan.removeIncomeIds);

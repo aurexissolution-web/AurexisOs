@@ -11,8 +11,8 @@ import { ReviewsSection } from "@/components/sections/reviews/ReviewsSection";
 import { FAQSection } from "@/components/sections/FAQSection";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 
-// Re-render on every request so newly-approved reviews show up immediately.
-export const dynamic = "force-dynamic";
+// Cached for a minute. Approving or deleting a review also revalidates "/" right away.
+export const revalidate = 60;
 
 export default function Home() {
   return (
